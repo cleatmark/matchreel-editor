@@ -1,0 +1,11 @@
+{
+  "league_logo": "shared/team_logos/league_b.png",
+  "home": "Home FC",
+  "home_logo": "shared/team_logos/home_fc.png",
+  "date": "March 21, 2026",
+  "opponent": "Guest FC",
+  "away_logo": "shared/team_logos/guest_fc.png",
+  "score": "2-4",
+  "halftime_score": "1-2",
+  "league": "League B"
+}

@@ -1,0 +1,12 @@
+# XbotGo review editor + tools (Python 3.10+). Helper programs (ffmpeg, ffprobe, tesseract, ...) live in utils\ or on PATH.
+flask
+gspread
+numpy
+opencv-python
+Pillow
+# optional: announcer voice inserts (tools/pipeline/announcer_gen.py)
+# kokoro-onnx
+# soundfile
+# websockets
+# development / tests
+# pyflakes

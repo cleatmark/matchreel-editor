@@ -1,0 +1,11 @@
+{
+  "league_logo": "shared/team_logos/league_a.png",
+  "home": "Home FC",
+  "home_logo": "shared/team_logos/home_fc.png",
+  "date": "March 29, 2026",
+  "opponent": "Guest FC",
+  "away_logo": "shared/team_logos/guest_fc.png",
+  "score": "3-3",
+  "halftime_score": "2-1",
+  "league": "League A"
+}

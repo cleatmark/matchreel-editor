@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XbotGo Review Editor</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="staleServerBanner" class="stale-banner" style="display: none;"></div>
+  <div id="productionLockBanner" class="production-lock-banner" style="display: none; background: #991B1B; color: #FEE2E2; padding: 6px 12px; font-size: 12px; font-weight: 600; text-align: center; border-bottom: 1px solid #DC2626;">
+    🔒 Final 4K Production is running in background (PID: <span id="lblLockPid"></span>). Actions that modify output files are locked.
+    <button type="button" class="btn btn-xs btn-secondary" style="margin-left: 10px; padding: 2px 6px; font-size: 11px; background: rgba(0,0,0,0.4);" onclick="openFinalProductionModal()">View / Cancel</button>
+  </div>
+  <div id="app" class="app-container">
+    
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <!-- Game & Menu Controls (Menu is first on the left, followed by game selector, calendar, gear) -->
+      <div class="control-group game-picker-group">
+        <!-- Menu Dropdown FIRST -->
+        <div class="menu-dropdown-wrapper">
+          <button id="btnAppMenu" class="btn btn-sm btn-menu" onclick="toggleAppMenu(event)" title="App Menu & Tools">
+            ☰ Menu ▾
+          </button>
+          <div id="appMenuDropdown" class="app-menu-dropdown" style="display: none;">
+            <div class="app-menu-item" onclick="openGameInfoModal(); closeAppMenu();">
+              <span class="menu-icon">⚙️</span>
+              <div class="menu-text">
+                <span class="menu-title">Game Setup...</span>
+                <span class="menu-sub">Opponent, logos, league, title cards</span>
+              </div>
+            </div>
+            <div class="app-menu-item" onclick="openRosterModal(); closeAppMenu();">
+              <span class="menu-icon">👥</span>
+              <div class="menu-text">
+                <span class="menu-title">Roster...</span>
+                <span class="menu-sub">View & edit team roster (syncs to Google Sheet)</span>
+              </div>
+            </div>
+            <div class="app-menu-item" onclick="openFeaturedPlayerModal(); closeAppMenu();">
+              <span class="menu-icon">🌟</span>
+              <div class="menu-text">
+                <span class="menu-title">Featured Player & Reels...</span>
+                <span class="menu-sub">Pick roster player & generate reels</span>
+              </div>
+            </div>
+            <div class="app-menu-item" onclick="openFinalProductionModal(); closeAppMenu();">
+              <span class="menu-icon">🚀</span>
+              <div class="menu-text">
+                <span class="menu-title">Final 4K Production...</span>
+                <span class="menu-sub">Pre-flight checks, batch generation & start</span>
+              </div>
+            </div>
+            <div class="app-menu-item" onclick="openOrganizeModal(); closeAppMenu();">
+              <span class="menu-icon">🧹</span>
+              <div class="menu-text">
+                <span class="menu-title">Tidy Output Folder...</span>
+                <span class="menu-sub">Move final reels to final\ & tidy intermediates</span>
+              </div>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="app-menu-item" onclick="triggerRecut(); closeAppMenu();">
+              <span class="menu-icon">🔄</span>
+              <div class="menu-text">
+                <span class="menu-title">Re-cut Changed Clips</span>
+                <span class="menu-sub">Fast local cut & preview reel</span>
+              </div>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="app-menu-item" onclick="window.open('/guide.html', '_blank'); closeAppMenu();">
+              <span class="menu-icon">📖</span>
+              <div class="menu-text">
+                <span class="menu-title">User Guide</span>
+                <span class="menu-sub">Keyboard shortcuts, zoom manual</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <select id="gameSelect" class="btn btn-select" onchange="onGameSelectChange()" title="Select Game">
+          <option value="__pick__">📅 Pick game...</option>
+        </select>
+        <button class="btn btn-sm btn-icon" onclick="openCalendarModal()" title="Pick match date from calendar" aria-label="Pick match date from calendar">📅</button>
+        <button id="btnGameInfo" class="btn btn-sm btn-icon" onclick="openGameInfoModal()" title="Game Setup, Opponent & Logos (Settings)" aria-label="Game Setup, opponent and logos">⚙️</button>
+      </div>
+
+      <div class="control-group half-filters">
+        <button id="filterHalfAll" class="btn-pill active" onclick="setHalfFilter('all')">All</button>
+        <button id="filterHalf1" class="btn-pill" onclick="setHalfFilter('1')">1st half</button>
+        <button id="filterHalf2" class="btn-pill" onclick="setHalfFilter('2')">2nd half</button>
+      </div>
+
+      <div class="control-group dropdown-filters">
+        <select id="typeFilter" class="btn btn-sm" onchange="onFilterChange()">
+          <option value="all">Type: All</option>
+          <option value="goal">Type: Goal</option>
+          <option value="mark">Type: Mark</option>
+        </select>
+
+        <button id="toggleSkipped" class="btn btn-sm" onclick="toggleShowSkipped()">
+          Show skipped
+        </button>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="status-indicator">
+        <span id="saveStatus" class="status-badge status-clean">Saved</span>
+        <span id="sheetSyncStatus" class="sheet-sync-pill" style="display: none;"></span>
+      </div>
+
+      <button id="undoBtn" class="btn btn-sm btn-secondary" onclick="undo()" title="Undo (Ctrl+Z)" disabled>
+        Undo
+      </button>
+
+      <button id="saveBtn" class="btn btn-primary" onclick="save()" title="Save CSV changes (Ctrl+S)">
+        💾 Save
+      </button>
+
+      <button id="recutBtn" class="btn btn-recut" onclick="triggerRecut()" title="Re-cut changed clips and build preview reel without touching Google Sheet">
+        ✂️ Re-cut
+      </button>
+
+      <button id="viewLogBtn" class="btn btn-secondary" onclick="viewLastLog()" title="Show the log of the last Re-cut / Generate / Cards job">📋 Log</button>
+
+      <button id="pushSheetBtn" class="btn btn-secondary" onclick="pushToGoogleSheet()" title="Push the entire reviewed table to Google Sheet tab">
+        ☁️ Push to Sheet
+      </button>
+
+      <a href="/guide.html" target="_blank" class="btn btn-sm btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center;" title="Open complete User Guide in new tab">📖 Guide</a>
+
+      <div class="control-group sync-group">
+        <label class="checkbox-label" title="Automatically push to Google Sheet when saving">
+          <input type="checkbox" id="autoSyncSheet" checked>
+          <span>Auto-push on save</span>
+        </label>
+      </div>
+    </header>
+
+    <!-- Main Workspace: 2-Pane Split -->
+    <main class="main-content">
+      
+      <!-- LEFT PANE: Times Table -->
+      <section class="times-panel" id="timesPanel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <h2 class="panel-title">Times</h2>
+            <span class="panel-subtitle">Click any time to seek. Double-click or F2 to edit.</span>
+          </div>
+          <div class="panel-counter">
+            <span id="rowCountDisplay">0 clips</span>
+          </div>
+        </div>
+
+        <div class="table-scroll-wrap">
+          <table class="times-table" id="timesTable">
+            <thead>
+              <tr>
+                <th class="col-clip">Clip</th>
+                <th class="col-type">Type (Mark)</th>
+                <th class="col-times">
+                  <div class="time-header-grid-3">
+                    <span>Start</span>
+                    <span>Event</span>
+                    <span>End</span>
+                  </div>
+                </th>
+                <th class="col-player">Player</th>
+                <th class="col-instructions">Flags</th>
+                <th class="col-notes">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="timesTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel-footer" id="timesPanelFooter">
+          <button id="addRowBtn" class="btn btn-sm btn-secondary btn-add-row" onclick="insertRowAtPlayhead()" title="Insert new row at current video playhead (Hotkey: Insert)">
+            ➕ Add row (Insert)
+          </button>
+          <span class="panel-footer-hint">at playhead</span>
+        </div>
+      </section>
+
+      <!-- DRAGGABLE DIVIDER -->
+      <div class="pane-resizer" id="paneResizer" title="Drag to resize panels"></div>
+
+      <!-- RIGHT PANE: Video Player & Inspector -->
+      <section class="video-panel" id="videoPanel">
+        <div class="video-card">
+          <div class="video-meta-bar">
+            <span id="currentVideoFile" class="video-filename">No video loaded</span>
+            <div class="meta-right">
+              <span id="timelineWindowLabel" class="timeline-zoom-pill" onclick="toggleTimelineZoom()" style="cursor: pointer;" title="Click to toggle Full/30s mode (Hotkey: F)">Zoom: 30s</span>
+              <span id="videoFitPill" class="timeline-zoom-pill" onclick="toggleVideoFit16x9()" style="cursor: pointer;" title="Toggle 16:9 Full Width (eliminates black side bars)">Fit: 16:9 ⤢</span>
+              <span id="videoCurrentTime" class="video-clock">00:00.0</span>
+            </div>
+          </div>
+
+          <div class="player-wrapper" id="playerWrapper">
+            <video id="mainVideo" playsinline preload="auto">
+              Your browser does not support HTML5 video.
+            </video>
+            <div id="videoOverlayMsg" class="video-overlay-msg" style="display: none;"></div>
+          </div>
+
+          <!-- Horizontal Draggable Resizer to pull down editing controls & expand video -->
+          <div class="video-resizer" id="videoResizer" title="Drag to adjust video height / pull down editing controls (Double-click to snap 16:9 full width)">
+            <div class="video-resizer-handle"></div>
+          </div>
+
+          <!-- Timeline strip with zoom & scale -->
+          <div class="timeline-wrapper">
+            <div class="timeline-ruler" id="timelineRuler"></div>
+            <div class="timeline-container" id="timelineContainer">
+              <div class="timeline-bar" id="timelineBar">
+                <!-- Action window highlight -->
+                <div id="timelineActionWindow" class="timeline-action-window"></div>
+                <!-- Mark line (Non-draggable match ground-truth reference) -->
+                <div id="timelineMarkLine" class="timeline-line line-mark" title="Mark (match reference)">
+                  <div class="line-handle-tag">MARK</div>
+                </div>
+                <!-- Start line -->
+                <div id="timelineStartLine" class="timeline-line line-start" title="Start (drag to adjust)">
+                  <div class="line-handle-tag">Start</div>
+                </div>
+                <!-- Event line -->
+                <div id="timelineEventLine" class="timeline-line line-event" title="Event (drag to adjust)">
+                  <div class="line-handle-tag">Event</div>
+                </div>
+                <!-- End line -->
+                <div id="timelineEndLine" class="timeline-line line-end" title="End (drag to adjust)">
+                  <div class="line-handle-tag">End</div>
+                </div>
+                <!-- Playhead -->
+                <div id="timelinePlayhead" class="timeline-playhead" title="Playhead (drag to scrub)">
+                  <div class="playhead-head"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compact Video Controls & Inspector Bar -->
+          <div class="video-bottom-controls">
+            
+            <!-- Row 1: Transport Controls & Metadata -->
+            <div class="transport-controls">
+              <!-- Left: Playback & Seeking -->
+              <div class="transport-left">
+                <button class="ctrl-btn" onclick="togglePlayPause()" id="playPauseBtn" title="Space">▶ Play</button>
+                <div class="clip-info-group">
+                  <span class="clip-label" id="inspectorClipLabel">Clip #</span>
+                  <span class="type-badge" id="inspectorTypeBadge">MARK</span>
+                  <span id="inspectorRowLabel" class="inspector-label-text"></span>
+                </div>
+                <div class="transport-divider"></div>
+                <button class="ctrl-btn" onclick="stepTime(-5)" title="Shift+Left">-5s</button>
+                <button class="ctrl-btn" onclick="stepTime(-1)" title="Left">-1s</button>
+                <button class="ctrl-btn" onclick="stepFrame(-1)" title="Comma (,)">&lt; Frame</button>
+                <button class="ctrl-btn" onclick="stepFrame(1)" title="Period (.)">Frame &gt;</button>
+                <button class="ctrl-btn" onclick="stepTime(1)" title="Right">+1s</button>
+                <button class="ctrl-btn" onclick="stepTime(5)" title="Shift+Right">+5s</button>
+              </div>
+
+              <!-- Middle: Video-related Controls (Timeline Zoom & Speed) -->
+              <div class="transport-middle">
+                <div class="timeline-mode-group" title="Timeline Scale Mode (Hotkey: F)">
+                  <button class="mode-pill active" id="btnModeZoom" onclick="setTimelineZoomMode(true)" title="Zoom in to 30s window around mark">🔍 30s</button>
+                  <button class="mode-pill" id="btnModeFull" onclick="setTimelineZoomMode(false)" title="Show entire video with 5-minute interval marks">🌐 Full (5m)</button>
+                </div>
+                <span class="speed-label">Speed:</span>
+                <button class="speed-btn" onclick="setPlaybackSpeed(0.25)">0.25x</button>
+                <button class="speed-btn" onclick="setPlaybackSpeed(0.5)">0.5x</button>
+                <button class="speed-btn active" id="speed1x" onclick="setPlaybackSpeed(1.0)">1x</button>
+                <button class="speed-btn" onclick="setPlaybackSpeed(2.0)">2x</button>
+              </div>
+
+              <!-- Right: Clip Annotation Menu (P: and Notes:) at end of line -->
+              <div class="transport-right">
+                <div class="meta-field-inline">
+                  <label for="inspPlayer" title="Player jersey number(s); two numbers = assist, scorer">Player:</label>
+                  <input type="text" id="inspPlayer" class="input-text-xs insp-player-input" placeholder="#, e.g. 11 or 11,1" aria-label="Player jersey number" onchange="onInspectorPlayerChange()" title="Player jersey number(s); two numbers = assist, scorer">
+                </div>
+                <div class="meta-field-inline notes-inline">
+                  <label>Notes:</label>
+                  <input type="text" id="inspNotes" class="input-text-xs insp-notes-input" placeholder="Notes..." onchange="onInspectorNotesChange()" title="Clip notes">
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 2: Streamlined Horizontal Timing Bar & Quick Actions -->
+            <div class="compact-timing-bar">
+              <div class="timing-blocks-cluster">
+                <!-- Mark (Reference only - what happened during game) -->
+                <div class="compact-time-group" id="blockMark">
+                  <span class="clickable-label compact-lbl lbl-mark" id="lblMark" onclick="onInspectorLabelClick('video_time')" title="Jump to Mark (reference only)">Mark:</span>
+                  <div class="time-block-val-wrap compact-val-wrap val-readonly" onclick="onInspectorLabelClick('video_time')" title="Mark is reference only (what happened during game)">
+                    <span class="time-block-val" id="inspValMark">--:--</span>
+                  </div>
+                </div>
+
+                <div class="timing-divider"></div>
+
+                <!-- Start -->
+                <div class="compact-time-group" id="blockStart">
+                  <span class="clickable-label compact-lbl lbl-start" id="lblStart" onclick="onInspectorLabelClick('action_start')" title="Jump to Start (Hotkey: 1)">Start:</span>
+                  <div class="time-block-val-wrap compact-val-wrap" onclick="startInspectorTimeEdit('action_start')" title="Click to edit">
+                    <span class="time-block-val" id="inspValStart">--:--</span>
+                  </div>
+                  <div class="time-btn-row">
+                    <button class="btn btn-xs" onclick="nudgeTime('action_start', -1)">-1s</button>
+                    <button class="btn btn-xs btn-set" onclick="setTimeFromPlayhead('action_start')" title="Set Start from playhead (Hotkey: 1)">Set</button>
+                    <button class="btn btn-xs" onclick="nudgeTime('action_start', 1)">+1s</button>
+                  </div>
+                </div>
+
+                <div class="timing-divider"></div>
+
+                <!-- Event -->
+                <div class="compact-time-group" id="blockEvent">
+                  <span class="clickable-label compact-lbl lbl-event" id="lblEvent" onclick="onInspectorLabelClick('event')" title="Jump to Event (Hotkey: 2)">Event:</span>
+                  <div class="time-block-val-wrap compact-val-wrap" onclick="startInspectorTimeEdit('event')" title="Click to edit">
+                    <span class="time-block-val" id="inspValEvent">--:--</span>
+                  </div>
+                  <div class="time-btn-row">
+                    <button class="btn btn-xs" onclick="nudgeTime('event', -1)">-1s</button>
+                    <button class="btn btn-xs btn-set" onclick="setTimeFromPlayhead('event')" title="Set Event from playhead (Hotkey: 2)">Set</button>
+                    <button class="btn btn-xs" onclick="nudgeTime('event', 1)">+1s</button>
+                  </div>
+                </div>
+
+                <div class="timing-divider"></div>
+
+                <!-- End -->
+                <div class="compact-time-group" id="blockEnd">
+                  <span class="clickable-label compact-lbl lbl-end" id="lblEnd" onclick="onInspectorLabelClick('action_end')" title="Jump to End (Hotkey: 3)">End:</span>
+                  <div class="time-block-val-wrap compact-val-wrap" onclick="startInspectorTimeEdit('action_end')" title="Click to edit">
+                    <span class="time-block-val" id="inspValEnd">--:--</span>
+                  </div>
+                  <div class="time-btn-row">
+                    <button class="btn btn-xs" onclick="nudgeTime('action_end', -1)">-1s</button>
+                    <button class="btn btn-xs btn-set" onclick="setTimeFromPlayhead('action_end')" title="Set End from playhead (Hotkey: 3)">Set</button>
+                    <button class="btn btn-xs" onclick="nudgeTime('action_end', 1)">+1s</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Delimiter before Zoom -->
+              <div class="timing-divider"></div>
+
+              <!-- Quick Actions -->
+              <div class="compact-actions-group">
+                <button id="inspToggleZoom" class="btn btn-xs btn-toggle" onclick="toggleZoomCurrentRow()">Zoom (Z)</button>
+                <button id="inspToggleSkip" class="btn btn-xs btn-toggle" onclick="toggleSkipCurrentRow()">Skip (X)</button>
+                <button id="loopActionBtn" class="btn btn-xs btn-secondary" onclick="toggleActionLoop()" title="Play or Stop action loop (Ctrl+Enter)">▶ Loop Action</button>
+                <button id="undoClipBtn" class="btn btn-xs btn-secondary" onclick="undoClip()" title="Undo changes on this clip" disabled>⟲ Undo Clip</button>
+                <div id="inspectorWarning" class="timing-warning" style="display: none;">⚠️ Order invalid</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="app-global-footer">
+      <span>XbotGo Review Editor</span>
+      <span class="footer-sep">•</span>
+      <span>Server started: <span id="lblServerStart">--:--:--</span></span>
+    </footer>
+
+    <!-- Calendar Date Picker Modal -->
+    <div id="calendarModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-calendar">
+        <div class="modal-header">
+          <h3>📅 Pick Match Date</h3>
+          <button class="btn btn-xs btn-close" onclick="closeCalendarModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-bottom: 14px;">
+            Select a match date. If a reviewed table exists, it will open directly. If a dump folder exists, the review table will be automatically generated.
+          </p>
+          
+          <div class="date-input-group" style="margin-bottom: 14px;">
+            <label for="calendarDateInput" style="font-weight: 600; color: var(--text-primary); margin-right: 8px;">Match Date:</label>
+            <input type="date" id="calendarDateInput" class="input-date" onchange="onCalendarDateInputChange()">
+          </div>
+
+          <div class="available-dates-section">
+            <div class="subhead-row" style="margin-bottom: 8px;">
+              <span class="subhead" style="font-weight: 700; color: var(--text-primary); font-size: 13px;">Detected Match Dates:</span>
+              <span class="legend-text" style="font-size: 11px; color: var(--text-secondary);">
+                <span class="legend-dot dot-reviewed"></span>Reviewed
+                <span class="legend-dot dot-dump"></span>Dump
+                <span class="legend-dot dot-disabled"></span>Old format
+              </span>
+            </div>
+            <div id="availableDatesList" class="dates-pill-list">
+              <!-- Dynamically populated with dates -->
+            </div>
+            <div id="calendarHoverHint" class="calendar-hover-hint" style="color: var(--text-secondary); margin-top: 8px; font-size: 12px; min-height: 18px;">
+              Hover over a date to view format and status.
+            </div>
+          </div>
+
+          <!-- Always-Visible Data Reload Warning Note -->
+          <div id="calendarReloadNoteBox" class="calendar-reload-note" style="margin-top: 14px; padding: 10px 12px; border-radius: 6px; background-color: #FEF3C7; border: 1px solid #F59E0B; color: #92400E; font-size: 12px; line-height: 1.4;">
+            <div style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
+              <span>ℹ️</span> <span id="calendarReloadNoteTitle">Opening a date reloads all data for that game.</span>
+            </div>
+            <div id="calendarReloadNoteDetail" style="margin-top: 4px; color: #78350F;">
+              Select a date above to preview the load action.
+            </div>
+          </div>
+
+          <!-- In-Page Confirmation Box (shown on Open / Generate click) -->
+          <div id="calendarConfirmBox" class="inpage-confirm-box" style="display: none; margin-top: 14px; padding: 12px; border-radius: 6px; background-color: #FFF1F2; border: 1px solid #F43F5E;">
+            <div style="display: flex; gap: 10px; align-items: flex-start;">
+              <span style="font-size: 20px; line-height: 1;">⚠️</span>
+              <div style="flex: 1;">
+                <strong id="calendarConfirmTitle" style="color: #9F1239; font-size: 13px; display: block;">Reload Game Data?</strong>
+                <p id="calendarConfirmDesc" style="color: #881337; font-size: 12px; margin: 4px 0 10px 0; line-height: 1.4;">
+                  All data for the selected date will be reloaded.
+                </p>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-xs btn-secondary" onclick="cancelCalendarConfirm()">Cancel</button>
+                  <button type="button" id="btnCalendarConfirmProceed" class="btn btn-xs btn-danger" onclick="proceedCalendarPick()">Continue</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="calendarModalFeedback" class="modal-feedback" style="display: none; margin-top: 10px;"></div>
+        </div>
+        <div class="modal-footer" id="calendarModalFooter">
+          <button class="btn btn-sm btn-secondary" onclick="closeCalendarModal()">Cancel</button>
+          <button id="calendarSubmitBtn" class="btn btn-sm btn-primary" onclick="submitCalendarPick()">Open / Generate</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Game Setup & Info Wizard Modal -->
+    <div id="gameInfoModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-wizard">
+        <div class="modal-header">
+          <h3 id="gameInfoModalTitle">⚙️ Game Setup & Info</h3>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button type="button" class="btn btn-xs btn-secondary" onclick="openGameDefaultsModal()" title="Configure global workflow defaults (Team, Logo, Featured Players, Sheet ID)">⚙️ Defaults...</button>
+            <button class="btn btn-xs btn-close" onclick="closeGameInfoModal()">✕</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc" id="gameInfoModalSubtitle">Set opponent, logos, and league for highlight reels and scoreboard sync.</p>
+
+          <form id="gameInfoForm" onsubmit="submitGameInfo(event)">
+            <!-- Match Name for Game Column in CSV -->
+            <div class="wizard-row">
+              <label for="inpMatchName" class="wizard-label">Match Name (CSV Game Column):</label>
+              <input type="text" id="inpMatchName" class="input-text" placeholder="e.g. 2026-03-29 Home FC v Guest FC">
+            </div>
+
+            <!-- Teams & Crests (Home & Away) -->
+            <div class="wizard-two-col">
+              <div>
+                <label for="inpHomeName" class="wizard-label">Home Team Name:</label>
+                <input type="text" id="inpHomeName" class="input-text" placeholder="e.g. Home FC">
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                  <label for="selHomeLogo" class="wizard-label">Home Crest / Logo:</label>
+                  <button type="button" class="btn btn-xs btn-link" style="font-size: 11px; padding: 0; color: #60A5FA;" onclick="triggerLogoUpload('home')">📁 Upload...</button>
+                  <input type="file" id="fileUploadHomeLogo" accept=".png,.jpg,.jpeg" style="display:none;" onchange="onLogoFileSelected(event, 'home')">
+                </div>
+                <div class="logo-select-wrapper">
+                  <select id="selHomeLogo" class="input-select" onchange="onHomeLogoChange()"></select>
+                  <div class="logo-thumb-box" id="homeLogoThumbBox">
+                    <img id="homeLogoImg" alt="Home Logo">
+                    <span id="homeLogoPlaceholder" class="thumb-placeholder" style="display: none;">No Logo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-two-col">
+              <div>
+                <label for="inpOpponentName" class="wizard-label">Opponent Team Name:</label>
+                <input type="text" id="inpOpponentName" class="input-text" placeholder="e.g. Guest FC" list="opponentTeamsList" oninput="onOpponentNameInput()">
+                <datalist id="opponentTeamsList"></datalist>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                  <label for="selAwayLogo" class="wizard-label">Opponent Crest / Logo:</label>
+                  <button type="button" class="btn btn-xs btn-link" style="font-size: 11px; padding: 0; color: #60A5FA;" onclick="triggerLogoUpload('away')">📁 Upload...</button>
+                  <input type="file" id="fileUploadAwayLogo" accept=".png,.jpg,.jpeg" style="display:none;" onchange="onLogoFileSelected(event, 'away')">
+                </div>
+                <div class="logo-select-wrapper">
+                  <select id="selAwayLogo" class="input-select" onchange="onAwayLogoChange()"></select>
+                  <div class="logo-thumb-box" id="awayLogoThumbBox">
+                    <img id="awayLogoImg" src="" alt="Away Logo" style="display: none;">
+                    <span id="awayLogoPlaceholder" class="thumb-placeholder">No Logo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- League Selection -->
+            <div class="wizard-row">
+              <label class="wizard-label">League Competition:</label>
+              <div class="wizard-league-pills" id="leaguePills"></div>
+              <div class="league-logo-preview" id="leagueLogoPreviewWrap">
+                <img id="leagueLogoImg" alt="League Logo">
+              </div>
+            </div>
+
+            <!-- Custom League details if Other selected -->
+            <div id="customLeagueRow" class="wizard-row" style="display: none; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 4px; border: 1px dashed rgba(255,255,255,0.1);">
+              <label for="inpCustomLeague" class="wizard-label">Custom League Name:</label>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="inpCustomLeague" class="input-text" placeholder="e.g. State Cup, Memorial Tournament" style="flex: 1;" oninput="onCustomLeagueInput()">
+                <button type="button" class="btn btn-xs btn-secondary" onclick="triggerLogoUpload('league')">📁 Upload Logo...</button>
+                <input type="file" id="fileUploadLeagueLogo" accept=".png,.jpg,.jpeg" style="display:none;" onchange="onLogoFileSelected(event, 'league')">
+              </div>
+            </div>
+
+
+            <!-- Scores & Date -->
+            <div class="wizard-two-col">
+              <div>
+                <label for="inpFinalScore" class="wizard-label">Final Score (Home-Away):</label>
+                <input type="text" id="inpFinalScore" class="input-text" placeholder="e.g. 6-0">
+              </div>
+              <div>
+                <label for="inpHalftimeScore" class="wizard-label">Halftime Score:</label>
+                <input type="text" id="inpHalftimeScore" class="input-text" placeholder="e.g. 3-0">
+              </div>
+            </div>
+
+            <div class="wizard-row">
+              <label for="inpGameDate" class="wizard-label">Game Date Display:</label>
+              <input type="text" id="inpGameDate" class="input-text" placeholder="e.g. March 29, 2026">
+            </div>
+
+            <div class="modal-footer" style="padding: 14px 0 0 0; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <button type="button" id="btnWizardGenerateCards" class="btn btn-sm btn-cards" onclick="generateCardsFromWizard()" title="Save setup and generate Intro, Half-time, and Outro title cards (make_reels.py --stage cards)">
+                  🎦 Generate Cards
+                </button>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeGameInfoModal()">Cancel</button>
+                <button type="submit" id="btnSaveGameInfo" class="btn btn-sm btn-primary">Save Game Setup</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    
+    <!-- Global Game & Workflow Defaults Modal -->
+    <div id="gameDefaultsModal" class="app-modal" style="display: none; z-index: 2100;">
+      <div class="modal-dialog modal-dialog-wizard" style="max-width: 540px;">
+        <div class="modal-header">
+          <h3>⚙️ Workflow & Team Defaults</h3>
+          <button class="btn btn-xs btn-close" onclick="closeGameDefaultsModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Configure default settings automatically applied to new games, setup wizards, and highlight reel generation.
+          </p>
+
+          <form id="gameDefaultsForm" onsubmit="submitGameDefaults(event)">
+            <div class="wizard-two-col" style="margin-bottom: 12px;">
+              <div>
+                <label for="defTeamName" class="wizard-label">Default Team Name:</label>
+                <input type="text" id="defTeamName" class="input-text" placeholder="e.g. Home FC">
+              </div>
+              <div>
+                <label class="wizard-label">Default Role:</label>
+                <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; cursor: pointer;">
+                  <input type="checkbox" id="defIsHome" checked>
+                  <span style="font-size: 13px; font-weight: 500;">Default as Home Team</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="wizard-row" style="margin-bottom: 12px;">
+              <label for="defTeamLogo" class="wizard-label">Default Team Logo:</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="defTeamLogo" class="input-select" style="flex: 1;" onchange="updateDefLogoPreview()">
+                  <!-- Dynamically populated from /api/logos -->
+                </select>
+                <div class="crest-preview-box" id="defTeamLogoPreview" style="width: 36px; height: 36px; flex-shrink: 0;"></div>
+              </div>
+            </div>
+
+            <div class="wizard-row" style="margin-bottom: 12px;">
+              <label class="wizard-label">Default League:</label>
+              <div class="wizard-league-pills" id="defLeaguePills"></div>
+            </div>
+
+            <div class="wizard-row" style="margin-bottom: 12px;">
+              <label for="defLeagueLogo" class="wizard-label">Default League Logo:</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <select id="defLeagueLogo" class="input-select" style="flex: 1;" onchange="updateDefLeagueLogoPreview()">
+                  <!-- Dynamically populated from /api/logos -->
+                </select>
+                <div class="crest-preview-box" id="defLeagueLogoPreview" style="width: 36px; height: 36px; flex-shrink: 0;"></div>
+              </div>
+            </div>
+
+            <div class="wizard-row" style="margin-bottom: 12px;">
+              <label for="defFeaturedPlayers" class="wizard-label">Default Featured Player(s):</label>
+              <input type="text" id="defFeaturedPlayers" class="input-text" placeholder="e.g. 7 or 7,4" title="Comma-separated player numbers selected by default in Featured Player reels">
+            </div>
+
+            <div class="wizard-row" style="margin-bottom: 16px;">
+              <label for="defSheetId" class="wizard-label">Google Sheet ID (Season Spreadsheet):</label>
+              <input type="text" id="defSheetId" class="input-text" placeholder="ID from the sheet URL (empty = Google Sheet sync off)" style="font-family: monospace; font-size: 12px;">
+            </div>
+
+            <div class="modal-footer" style="padding: 12px 0 0 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+              <button type="button" class="btn btn-sm btn-secondary" onclick="closeGameDefaultsModal()">Cancel</button>
+              <button type="submit" class="btn btn-sm btn-primary">💾 Save Defaults</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Player & Highlight Reels Modal -->
+    <div id="featuredPlayerModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-wizard" style="max-width: 580px;">
+        <div class="modal-header">
+          <h3>🌟 Featured Player & Reels</h3>
+          <button class="btn btn-xs btn-close" onclick="closeFeaturedPlayerModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Select a featured player for this game. Highlight reel production creates the full-team reel plus a dedicated spotlight reel for the selected player.
+          </p>
+
+          <!-- Roster Table Container -->
+          <div class="roster-table-wrap">
+            <table class="roster-table">
+              <thead>
+                <tr>
+                  <th style="width: 44px; text-align: center;">Pick</th>
+                  <th style="width: 48px; text-align: center;">#</th>
+                  <th>Player Name</th>
+                  <th>Short Name</th>
+                  <th style="text-align: right; width: 110px;">Clips in Game</th>
+                </tr>
+              </thead>
+              <tbody id="rosterTableBody">
+                <!-- Dynamically populated from /api/roster -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Production Stage Options -->
+          <div class="wizard-row" style="margin-top: 14px; margin-bottom: 6px;">
+            <label class="wizard-label">Production Pipeline:</label>
+            <div class="wizard-league-pills">
+              <label class="league-pill-opt" title="Runs full pipeline: cards -> 4K clips -> 4K replays -> final reels">
+                <input type="radio" name="reelStageChoice" value="all" checked>
+                <span>Full Reel Pipeline (All Stages)</span>
+              </label>
+              <label class="league-pill-opt" title="Assemble reels only from already cut clips">
+                <input type="radio" name="reelStageChoice" value="reels">
+                <span>Reels Only (Fast Assembly)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="padding: 14px 0 0 0; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn btn-sm btn-secondary" onclick="closeFeaturedPlayerModal()">Cancel</button>
+            <button type="button" id="btnSubmitGenerateReels" class="btn btn-sm btn-primary" onclick="submitFeaturedPlayerReels()">
+              🎬 Generate Reels
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Final 4K Production Modal -->
+    <div id="finalProductionModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-wizard" style="max-width: 640px; max-height: 92vh;">
+        <div class="modal-header">
+          <h3>🚀 Final 4K Production</h3>
+          <button class="btn btn-xs btn-close" onclick="closeFinalProductionModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Assemble 4K master clips, high-framerate zoom replays, full-game video, and highlight reels.
+          </p>
+
+          <!-- Shown INSTEAD of everything below when the game is tidied (archived) -->
+          <div id="productionTidiedPanel" style="display: none; padding: 14px; background: #EFF6FF; border: 1px solid #93C5FD; border-radius: 6px; color: #1E3A8A; font-size: 13px; line-height: 1.55;">
+            <div style="font-weight: 700; margin-bottom: 6px;">🧹 This game is tidied (archived) - nothing to produce</div>
+            The full game and reels are finished in <code>final\</code> and the editing files are in <code>work\</code>, so the production checks, batch script and Start do not apply.
+            To re-render this game (for example after changing a zoom replay), untidy it first, then come back here.
+            <div style="margin-top: 10px;"><button type="button" class="btn btn-sm btn-accent" onclick="openUntidyFromProduction()">↩ Untidy this game...</button></div>
+          </div>
+
+          <!-- Pre-flight Checks Section -->
+          <div class="preflight-section">
+            <h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #1E293B; font-weight: 700;">
+              Pre-Flight Validation Checklist
+            </h4>
+            <div id="preflightChecksList" class="preflight-list">
+              <div class="preflight-loading" style="color: #475569; font-size: 13px;">Running checks...</div>
+            </div>
+            <div id="productionEstimateBox" style="margin-top: 8px; font-size: 12px; color: #334155;"></div>
+          </div>
+
+          <!-- 4K Outputs Out of Date Alert & Rebuild Action -->
+          <div id="productionStaleAlert" style="display: none; margin-top: 12px; padding: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #D97706; margin-bottom: 4px;">
+                  ⚠️ 4K Outputs Out of Date
+                </div>
+                <div id="productionStaleDesc" style="font-size: 12px; color: #334155; line-height: 1.5;">
+                  4K replays and highlight reels are out of date because replay window or crop settings were modified after the last production run.
+                </div>
+                <div id="productionStaleClipsList" style="margin-top: 6px; font-size: 11px; font-family: monospace; color: #B45309; font-weight: 600;"></div>
+                <div id="productionStaleEstimate" style="margin-top: 6px; font-size: 11px; color: #2563EB;"></div>
+              </div>
+              <button type="button" id="btnRebuildStale" class="btn btn-xs btn-primary" onclick="rebuildStaleProduction()" style="white-space: nowrap; background: #D97706; border-color: #B45309;">
+                ⚡ Rebuild Changed 4K Replays & Reels
+              </button>
+            </div>
+            <div style="margin-top: 6px; font-size: 11px; color: #64748B;">
+              Rebuilding only re-renders modified 4K replays and updates highlight reels (~2 minutes; unchanged clips are skipped).
+            </div>
+          </div>
+
+          <!-- Batch Generation Card -->
+          <div class="production-batch-card" style="margin-top: 14px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 700; color: #0F172A;">Batch Script</span>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btnDryRunBat" class="btn btn-xs btn-secondary" onclick="dryRunProductionBat()">
+                  🔍 Dry Run
+                </button>
+                <button type="button" id="btnGenerateBat" class="btn btn-xs btn-secondary" onclick="generateProductionBat()">
+                  ⚙️ Generate .bat
+                </button>
+              </div>
+            </div>
+            <div id="batFileInfo" style="font-family: monospace; font-size: 12px; color: #334155; word-break: break-all;">
+              Not generated yet
+            </div>
+            <div id="batCommandBox" style="margin-top: 6px; display: none;">
+              <span style="font-size: 11px; color: #475569; font-weight: 600;">Command to run on PC:</span>
+              <pre id="batCommandPre" style="margin: 4px 0 0 0; padding: 6px 8px; background: #0F172A; border-radius: 4px; font-size: 12px; color: #72E098; user-select: all; overflow-x: auto;"></pre>
+            </div>
+          </div>
+
+          <!-- Multi-hour warning banner -->
+          <div class="production-warning-box" style="margin-top: 14px; padding: 10px 12px; background: #FEF3C7; border-left: 3px solid #D97706; border-radius: 4px; font-size: 12px; color: #78350F;">
+            ⚠️ <strong>4K Production takes 1–3 hours.</strong> Runs serially in an independent console (cards → full game → 4K clips, replays, reels → check outputs). <strong>To resume:</strong> press Cancel Run, then Start again. Finished 4K clips, replays and reels and a finished full game are skipped; title cards (~15 s) are rebuilt, and a full game cancelled mid-way restarts from its beginning.
+          </div>
+
+          <!-- Typed Confirmation Box -->
+          <div id="productionConfirmBox" style="margin-top: 12px; padding: 10px; background: #F1F5F9; border-radius: 4px; border: 1px solid #CBD5E1;">
+            <label for="inpProductionConfirm" style="font-size: 12px; color: #1E293B; display: block; margin-bottom: 4px;">
+              To unlock production launch, type <strong>START</strong> below:
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="inpProductionConfirm" class="input-text" placeholder="Type START" oninput="onProductionConfirmInput()" style="max-width: 140px; text-transform: uppercase;">
+              <span id="productionConfirmHint" style="font-size: 11px; color: #475569;">Required confirmation for multi-hour 4K run</span>
+            </div>
+          </div>
+
+          <!-- Production Log / Status View (when running) -->
+          <div id="productionStatusWrap" style="display: none; margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span id="productionLiveStatus" style="font-size: 12px; font-weight: 600; color: #1D4ED8;">Status: Idle</span>
+              <span id="productionLastRunNote" style="display: none; font-size: 11px; color: #64748B; margin-left: 8px;"></span>
+              <button type="button" class="btn btn-xs btn-secondary" onclick="viewProductionLog()">📜 View Full Log</button>
+            </div>
+            <pre id="productionLogTail" style="max-height: 120px; overflow-y: auto; background: #0F172A; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 8px; font-size: 11px; font-family: monospace; color: #CBD5E1; margin: 0;"></pre>
+          </div>
+
+          <div class="modal-footer" style="padding: 12px 0 4px 0; margin-top: 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: 0; background: #FFF; border-top: 1px solid #E2E8F0;">
+            <div>
+              <button type="button" class="btn btn-sm btn-secondary" onclick="closeFinalProductionModal()">Close</button>
+              <button type="button" id="btnCancelProduction" class="btn btn-sm btn-danger" style="display: none; margin-left: 8px;" onclick="cancelFinalProduction()">⏹ Cancel Run</button>
+            </div>
+            <button type="button" id="btnStartProduction" class="btn btn-sm btn-accent" onclick="startFinalProduction()" disabled>
+              ▶ Start 4K Production
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Tidy / Organize Output Folder Modal -->
+    <div id="organizeModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-lg">
+        <div class="modal-header">
+          <h3 style="display: flex; align-items: center; gap: 8px;">
+            <span>🧹</span> Tidy Output Folder
+          </h3>
+          <button class="btn btn-xs btn-close" onclick="closeOrganizeModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 16px 20px; flex: 1 1 auto; overflow-y: auto; min-height: 0;">
+          <p class="modal-desc" style="color: #475569; font-size: 13px; line-height: 1.5; margin-bottom: 14px;">
+            Organizes the match directory into canonical subfolders: moves final video reels into <code>final/</code>, regenerable inputs into <code>work/</code>, and intermediate clips into <code>_to_delete/</code>. Nothing is permanently deleted; every move is recorded in <code>out\_organize_manifest.json</code> and can be restored.
+          </p>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span id="organizeStatusLabel" style="font-size: 12px; font-weight: 600; color: #38BDF8;">Plan Preview (Dry Run)</span>
+            <button type="button" id="btnRefreshOrganize" class="btn btn-xs btn-secondary" onclick="previewOrganizePlan()">🔄 Refresh Plan</button>
+          </div>
+
+          <pre id="organizePlanPre" style="max-height: 260px; overflow-y: auto; background: #0F172A; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: monospace; color: #CBD5E1; margin: 0; line-height: 1.5;">Loading plan...</pre>
+        </div>
+        <div class="modal-footer" style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+          <button type="button" class="btn btn-sm btn-secondary" onclick="closeOrganizeModal()">Close</button>
+          <button type="button" id="btnUntidyOrganize" class="btn btn-sm btn-secondary" onclick="toggleUntidyMode()" title="Move work/ and final/ back into the game folder so the game can be re-rendered">↩ Untidy...</button>
+          <button type="button" id="btnApplyOrganize" class="btn btn-sm btn-accent" onclick="applyOrganizePlan()">
+            ✅ Apply Moves
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Process Execution Log Modal (Re-cut & Generator) -->
+    <div id="logModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-lg">
+        <div class="modal-header">
+          <h3 id="logModalTitle">✂️ Process Execution</h3>
+          <button class="btn btn-xs btn-close" onclick="closeLogModal()">✕</button>
+        </div>
+        <div class="modal-body modal-body-terminal">
+          <pre id="logModalPre" class="log-terminal">Initializing process...</pre>
+        </div>
+        <div class="modal-footer">
+          <span id="logModalStatus" class="log-status">Running...</span>
+          <label class="log-autoclose" title="Close this window by itself when the job finishes successfully (errors always stay open). Re-open it any time with the 📋 Log button.">
+            <input type="checkbox" id="logAutoClose" checked> Auto-close when done
+          </label>
+          <button id="logModalCloseBtn" class="btn btn-sm btn-secondary" onclick="closeLogModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Team Roster Modal -->
+    <div id="rosterModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog modal-dialog-wizard" style="max-width: 980px; width: 94vw;">
+        <div class="modal-header">
+          <h3>👥 Team Roster</h3>
+          <button class="btn btn-xs btn-close" onclick="closeRosterModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 16px 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="rosterSyncStatus" class="status-badge" style="font-size: 11px; padding: 3px 8px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3);">Checking sync...</span>
+              <span id="rosterCacheDate" style="font-size: 11px; color: #64748B;"></span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="btnPullRoster" class="btn btn-sm btn-secondary" onclick="pullRosterFromGoogle()" title="Pull latest roster from Google Sheet">
+                ⬇️ Pull from Google Sheet
+              </button>
+              <button type="button" id="btnAddRosterRow" class="btn btn-sm btn-primary" onclick="addRosterRow()" title="Add new player row">
+                ➕ Add Player
+              </button>
+            </div>
+          </div>
+
+          <div class="roster-table-scroll" style="max-height: 460px; overflow-y: auto; border: 1px solid #CBD5E1; border-radius: 6px; background: #FFFFFF;">
+            <table class="roster-editor-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr style="position: sticky; top: 0; z-index: 2;">
+                  <th style="padding: 10px 8px; width: 60px; text-align: center;">No</th>
+                  <th style="padding: 10px 12px; min-width: 200px; text-align: left;">Player Name</th>
+                  <th style="padding: 10px 10px; width: 140px; text-align: left;">Short Name</th>
+                  <th style="padding: 10px 12px; min-width: 300px; text-align: left;">Contact / Parent Email</th>
+                  <th style="padding: 10px 6px; width: 44px; text-align: center;"></th>
+                </tr>
+              </thead>
+              <tbody id="rosterEditorTableBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-top: 1px solid #334155;">
+          <span id="rosterPlayerCountNote" style="font-size: 12px; color: #64748B;">0 players</span>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" onclick="closeRosterModal()">Cancel</button>
+            <button type="button" id="btnSaveRoster" class="btn btn-accent" onclick="saveRoster()">💾 Save Roster</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- In-Page Confirmation Modal -->
+    <div id="confirmModal" class="app-modal" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 id="confirmModalTitle">Confirm Action</h3>
+          <button class="btn btn-xs btn-close" onclick="closeConfirmModal(false)">✕</button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmModalPrompt" class="modal-desc" style="color: #0F172A; font-size: 14px; margin: 6px 0 16px 0; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-secondary" onclick="closeConfirmModal(false)">Cancel</button>
+          <button id="confirmModalOkBtn" class="btn btn-sm btn-danger" onclick="closeConfirmModal(true)">OK</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- In-Page Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

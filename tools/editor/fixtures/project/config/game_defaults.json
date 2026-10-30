@@ -1,0 +1,22 @@
+{
+  "team_name": "Home FC",
+  "is_home": true,
+  "team_logo": "shared/team_logos/home_fc.png",
+  "leagues": [
+    {
+      "name": "League A",
+      "logo": "shared/team_logos/league_a.png"
+    },
+    {
+      "name": "League B",
+      "logo": "shared/team_logos/league_b.png"
+    }
+  ],
+  "league": "League A",
+  "league_logo": "shared/team_logos/league_a.png",
+  "featured_players": [
+    "7"
+  ],
+  "sheet_id": "",
+  "guest_name": "Guest FC"
+}

@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XbotGo Review & Zoom Editor — User Guide</title>
+  <style>
+    :root {
+      --bg-page: #0E100F;
+      --bg-surface: #161817;
+      --bg-card: #1E2220;
+      --bg-card-hover: #262B28;
+      --border: #2C322E;
+      --border-accent: #3A453F;
+      --text-main: #E2E8F0;
+      --text-muted: #94A3B8;
+      --text-bright: #FFFFFF;
+      --accent-green: #10B981;
+      --accent-green-bg: rgba(16, 185, 129, 0.12);
+      --accent-blue: #38BDF8;
+      --accent-blue-bg: rgba(56, 189, 248, 0.12);
+      --accent-amber: #F59E0B;
+      --accent-amber-bg: rgba(245, 158, 11, 0.12);
+      --accent-red: #EF4444;
+      --accent-red-bg: rgba(239, 68, 68, 0.12);
+      --sidebar-width: 290px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.65;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR NAVIGATION */
+    aside.guide-sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title span.badge {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .search-box {
+      margin-top: 12px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 7px 10px 7px 28px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-box input:focus {
+      border-color: var(--accent-green);
+    }
+    .search-box svg {
+      position: absolute;
+      left: 8px;
+      top: 9px;
+      width: 14px;
+      height: 14px;
+      fill: var(--text-muted);
+    }
+
+    nav.sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #64748B;
+      padding: 10px 10px 4px 10px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      line-height: 1.3;
+    }
+    .nav-link:hover {
+      background: var(--bg-card);
+      color: var(--text-bright);
+    }
+    .nav-link.active {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+    .sidebar-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* MAIN CONTENT */
+    main.guide-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      max-width: 1060px;
+      padding: 40px 48px 80px 48px;
+    }
+
+    /* HERO */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(56, 189, 248, 0.05) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 40px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .hero-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-bright);
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+    .hero-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 820px;
+      line-height: 1.6;
+    }
+
+    /* TYPOGRAPHY & SECTIONS */
+    section.guide-section {
+      margin-bottom: 56px;
+      scroll-margin-top: 30px;
+    }
+    h2.section-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-bright);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h3.sub-heading {
+      font-size: 17px;
+      font-weight: 600;
+      color: #F1F5F9;
+      margin: 28px 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    p {
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+    p strong {
+      color: var(--text-bright);
+    }
+
+    /* SCREENSHOT CONTAINERS */
+    .screenshot-frame {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 20px 0 28px 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .screenshot-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .screenshot-header .dots {
+      display: flex;
+      gap: 6px;
+    }
+    .screenshot-header .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #334155;
+    }
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: opacity 0.2s;
+    }
+    .screenshot-caption {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: #141715;
+      border-top: 1px solid var(--border);
+    }
+    .screenshot-caption strong {
+      color: var(--accent-green);
+    }
+
+    /* CALLOUT BOXES */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .callout-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .callout-body {
+      flex: 1;
+    }
+    .callout-body strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+    .callout-tip {
+      background: var(--accent-green-bg);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #D1FAE5;
+    }
+    .callout-tip strong { color: var(--accent-green); }
+    .callout-info {
+      background: var(--accent-blue-bg);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #E0F2FE;
+    }
+    .callout-info strong { color: var(--accent-blue); }
+    .callout-warning {
+      background: var(--accent-amber-bg);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #FEF3C7;
+    }
+    .callout-warning strong { color: var(--accent-amber); }
+    .callout-danger {
+      background: var(--accent-red-bg);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #FEE2E2;
+    }
+    .callout-danger strong { color: var(--accent-red); }
+
+    /* STEP CARDS */
+    .step-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      position: relative;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      color: #000;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* SHORTCUT KEYBOARD BADGES */
+    kbd {
+      background-color: #2D333B;
+      color: #F0F6FC;
+      border: 1px solid #444C56;
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      padding: 2px 7px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    }
+
+    /* SHORTCUTS TABLE */
+    table.guide-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0 28px 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13.5px;
+    }
+    table.guide-table th {
+      background: var(--bg-surface);
+      color: #94A3B8;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    table.guide-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-main);
+    }
+    table.guide-table tr:last-child td {
+      border-bottom: none;
+    }
+    table.guide-table tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* CHIP BADGES */
+    .chip {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .chip-zoom {
+      background: #0284C7;
+      color: #FFF;
+    }
+    .chip-skip {
+      background: #475569;
+      color: #94A3B8;
+    }
+    .chip-goal {
+      background: #15803D;
+      color: #DCFCE7;
+    }
+    .chip-attempt {
+      background: #A16207;
+      color: #FEF3C7;
+    }
+
+    /* FEATURE LIST */
+    ul.feature-list {
+      list-style: none;
+      margin: 12px 0 20px 0;
+    }
+    ul.feature-list li {
+      position: relative;
+      padding-left: 24px;
+      margin-bottom: 10px;
+      font-size: 14.5px;
+    }
+    ul.feature-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--accent-green);
+      font-weight: 800;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      aside.guide-sidebar { display: none; }
+      main.guide-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT SIDEBAR TABLE OF CONTENTS -->
+  <aside class="guide-sidebar">
+    <div class="sidebar-header">
+      <div class="brand-title">
+        XbotGo Editors
+        <span class="badge">v2.10</span>
+      </div>
+      <div class="brand-subtitle">Complete First-Time User Guide</div>
+      <div class="search-box">
+        <svg viewBox="0 0 20 20"><path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/></svg>
+        <input type="text" id="guideSearchInput" placeholder="Quick search guide..." oninput="filterGuideNav()">
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <div class="nav-section-title">Getting Started</div>
+      <a href="#quick-start" class="nav-link">🚀 60-Second Quick Start</a>
+      <a href="#one-time-setup" class="nav-link">🧰 One-Time Setup (new PC)</a>
+      <a href="#first-game-checklist" class="nav-link">✅ First-Game Checklist</a>
+      <a href="#how-to-launch" class="nav-link">⚡ How to Launch the App</a>
+      <a href="#mission" class="nav-link">🎯 What the Editors Do</a>
+
+      <div class="nav-section-title">Review Editor Interface</div>
+      <a href="#review-overview" class="nav-link">🖥️ Workspace Overview</a>
+      <a href="#app-menu-section" class="nav-link">☰ App Menu & Tools</a>
+      <a href="#phone-dump-ingestion" class="nav-link">📱 Phone Footage & Logs Ingestion</a>
+      <a href="#team-roster-section" class="nav-link">👥 Team Roster Management</a>
+      <a href="#game-setup-wizard" class="nav-link">⚙️ Game Setup Wizard</a>
+      <a href="#featured-player-section" class="nav-link">🌟 Featured Player & Reels</a>
+      <a href="#review-top-bar" class="nav-link">📅 Top Bar & Game Picker</a>
+      <a href="#times-table" class="nav-link">📋 The Times Table</a>
+      <a href="#dual-timeline" class="nav-link">🔍 Dual-Scale Timeline</a>
+      <a href="#inspector-panel" class="nav-link">🎛️ The Inspector Panel</a>
+      <a href="#action-loop" class="nav-link">🔁 Action Window Looping</a>
+
+      <div class="nav-section-title">Visual Zoom Replay Editor</div>
+      <a href="#zoom-intro" class="nav-link">🎬 What is a Zoom Replay?</a>
+      <a href="#zoom-launch" class="nav-link">🔍 Opening a Zoom Clip</a>
+      <a href="#zoom-workspace" class="nav-link">📐 The Zoom Workspace</a>
+      <a href="#zoom-cropbox" class="nav-link">🔲 START Anchor vs Pan</a>
+      <a href="#zoom-pan-keyframe" class="nav-link">🎯 Adding Pan Keyframes</a>
+      <a href="#zoom-preview" class="nav-link">▶️ Instant Replay Preview</a>
+      <a href="#zoom-unreviewed-blocking" class="nav-link">⚠️ Unreviewed Crop Blocking</a>
+      <a href="#zoom-render" class="nav-link">⚡ Render Exact & Verify</a>
+      <a href="#zoom-remove-restore" class="nav-link">↩️ Remove & Restore Zoom</a>
+
+      <div class="nav-section-title">Production & Workflows</div>
+      <a href="#final-production-section" class="nav-link">🚀 Final 4K Production</a>
+      <a href="#shortcuts-cheat-sheet" class="nav-link">⌨️ Keyboard Shortcuts</a>
+      <a href="#recipes" class="nav-link">💡 Common Editing Recipes</a>
+      <a href="#troubleshooting" class="nav-link">❓ Troubleshooting & FAQ</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>Local Port: <strong>5000</strong></span>
+      <a href="/" target="_blank">Open App ↗</a>
+    </div>
+  </aside>
+
+  <!-- MAIN GUIDE CONTENT -->
+  <main class="guide-content">
+
+    <!-- HERO -->
+    <div class="hero-banner">
+      <span class="hero-badge">Official User Manual</span>
+      <h1 class="hero-title">XbotGo Review & Zoom Editor Guide</h1>
+      <p class="hero-desc">
+        Welcome! This guide is written for anyone using the <strong>XbotGo Review Editor</strong> and <strong>Zoom Replay Editor</strong> for the first time. Learn how to navigate your match footage, refine clip timings, tag players, and craft 720p zoom replays with smooth pan tracking.
+      </p>
+    </div>
+
+    <!-- SECTION 1: QUICK START -->
+    <section id="quick-start" class="guide-section">
+      <h2 class="section-heading">🚀 60-Second Quick Start</h2>
+      <p>If you're in a hurry to review a soccer match, here is the entire workflow in 3 steps:</p>
+
+      <div class="step-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title">Launch & Select Game</div>
+          <div class="step-desc">Double-click <code>review_editor.bat</code>. Pick your game date from the top-left dropdown or click 📅.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title">Watch & Refine Timings</div>
+          <div class="step-desc">Click any row in the table. Drag the Start (green), Event (amber), or End (red) handles on the timeline.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title">Save & Push to Sheet</div>
+          <div class="step-desc">Press <kbd>Ctrl + S</kbd> anytime. Changes save atomically to disk and auto-push to Google Sheets!</div>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>The Review Editor rule:</strong>
+          It edits timings and review flags only. Video cutting, highlight reels, and final zoom mp4 encoding stay with the downstream pipeline scripts (<code>sync_game.py</code> and <code>make_run_all.py</code>).
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: ONE-TIME SETUP -->
+    <section id="one-time-setup" class="guide-section">
+      <h2 class="section-heading">🧰 One-Time Setup (new PC or new user)</h2>
+      <p>Do this once. The project lives in <code>XbotGo</code> project folder (any location works; keep the folder layout inside it).</p>
+      <table class="recipe-table" style="width:100%; margin:12px 0;">
+        <thead><tr><th style="width:28%;">What</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1. Python 3.10+</strong></td><td>Install from python.org or the Microsoft Store, then check: <code>python --version</code></td></tr>
+          <tr><td><strong>2. Python packages</strong></td><td>In the project folder: <code>pip install -r requirements.txt</code> (flask, gspread, numpy, opencv-python, Pillow)</td></tr>
+          <tr><td><strong>3. Helper programs</strong></td><td>ffmpeg, ffprobe and tesseract are already in <code>utils\</code>; nothing needs the Windows PATH. Check: <code>utils\ffmpeg\bin\ffmpeg -version</code></td></tr>
+          <tr><td><strong>4. Google Sheet access (optional)</strong></td><td>Put the service-account key (<code>.json</code>) in <code>shared\secrets\</code> and share the workbook with that account's e-mail as Editor. Test: <code>python tools\pipeline\sheet_sync.py tabs</code> lists the tabs. Without it the editor still works; only Push to Sheet and Roster pull fail.</td></tr>
+          <tr><td><strong>5. Logos and music</strong></td><td>Crests and league logos go in <code>shared\team_logos\</code>, music beds in <code>shared\Music\</code>. A new opponent crest can also be added with Upload in Game Setup.</td></tr>
+          <tr><td><strong>6. Start the editor</strong></td><td>Double-click <code>review_editor.bat</code> (opens http://127.0.0.1:5000). If it says another copy is running, close that window first.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION: FIRST-GAME COMPLETE CHECKLIST -->
+    <section id="first-game-checklist" class="guide-section">
+      <h2 class="section-heading">✅ Complete First-Game Checklist (Step-by-Step)</h2>
+      <p>Follow this 10-step sequence to process any brand-new match from raw dump to final 4K video:</p>
+
+      <div class="workflow-checklist" style="display:flex; flex-direction:column; gap:10px; margin:16px 0;">
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 0: Copy Smartphone Match Footage & App Dump</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Connect smartphone via USB (File Transfer mode). Connect the phone by USB (File Transfer mode). Make a PC folder named <code>MM-DD-YY</code> (e.g. <code>04-01-26</code>) and copy into it: the match videos (phone <code>DCIM/XbotGo</code>) as <code>04-01-26/Videos/*.mp4</code>, and the whole <code>Android/data/com.blink.blinkfocos</code> folder as <code>04-01-26/com.blink.blinkfocos/</code>. (The older <code>DCIM/XbotGo</code> + <code>Android/data/...</code> layout is still understood.) The editor lists the new date in yellow as a <strong>Dump</strong>.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 1: Scaffolding / Discovery</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Open editor, click 📅 or pick date. If first time loading, the editor discovers the dump folder, extracts timeline, and generates initial review CSV.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 2: Game Setup Wizard (☰ Menu ▾ → Game Setup)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Set Home Team (pre-filled from Defaults) & Crest, Opponent Team & Crest, League (from your configured leagues), Final & Halftime scores, and Match Name.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 3: Generate Title Cards (🎦 Generate Cards in Wizard)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Renders Intro, Half-time, and Outro title cards (<code>000_intro_fullgame.mp4</code>, etc.) using chosen crests and team names.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 4: Refine Clip Timings in Times Table</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Navigate clips. Drag Start/Event/End handles on the timeline. Ensure Start ≤ Event ≤ End (the editor warns and blocks saving if invalid).</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 5: Atomic Save & Push to Google Sheet</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Press <kbd>Ctrl + S</kbd> or click 💾 Save. Writes reviewed CSV with timestamped <code>.bak</code> sibling and synchronizes with your Google Sheet tab.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 6: Fast Re-cut Changed Clips (🔄 Re-cut)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Cuts edited clips locally and re-assembles the local preview reel. Logs persist server-side in <code>tmp/task_logs/</code>. The log window closes by itself when the run succeeds (untick <strong>auto-close</strong> to keep it open, even mid-run); the <strong>📋 Log</strong> button reopens the last log. The same applies to Generate review. <strong>Honest status:</strong> if any clip fails to cut or the preview reel check fails, the log ends with <code>ERROR: Re-cut finished with errors</code> listing the clips, the dialog shows a failure instead of &quot;Completed successfully&quot;, and nothing is reported as done.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 7: Craft Zoom Replays (🔍 Edit zoom)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Review framing for each zoom replay. Adjust crop box, drop pan keyframe (<kbd>K</kbd>) if play moves across frame, test preview (<kbd>R</kbd>), and press <kbd>Ctrl + S</kbd> to save plan. <em>Unreviewed silent center crops are strictly blocked from rendering!</em></span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 8: Render & Verify Zoom Replays (▶ Render exact / All)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Renders 720p previews with <code>verify_zoom.py</code> edge/length verification. If any clip is missing or flagged, the drawer ends RED with a clear failure alert.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 9: Featured Player Spotlight Reels (☰ Menu ▾ → Featured Player)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Select featured roster player(s) (e.g. #7 Chloe Bennett or #10 Ava Patterson). Generates team highlight reel plus individual player spotlight reel(s). The reel pipeline shows a progress line per stage in the log window ([clips], [replays], [reels], team highlights done); it can take 30-50 minutes for a full game, and you can close the window and reopen it from the menu.</span>
+        </div>
+        <div class="step-card" style="padding:12px 16px;">
+          <strong>Step 10: Final 4K Production (☰ Menu ▾ → Final 4K Production)</strong><br>
+          <span style="font-size:13px; color:var(--text-muted);">Runs 6 pre-flight checks, generates serial batch script (<code>run_everything_&lt;date&gt;.bat</code>), shows the exact command, and launches after explicit confirmation. Safe to pause and resume!</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: HOW TO LAUNCH -->
+    <section id="how-to-launch" class="guide-section">
+      <h2 class="section-heading">⚡ How to Launch the App</h2>
+      <p>Everything runs 100% locally on your computer with zero external server dependencies:</p>
+
+      <ul class="feature-list">
+        <li><strong>Method 1 (Recommended):</strong> Double-click <kbd>review_editor.bat</kbd> in the project root folder (<code>review_editor.bat</code>). It automatically checks the port, launches the local server, and opens your default browser at <code>http://127.0.0.1:5000</code>.</li>
+        <li><strong>Method 2 (Command Line):</strong> Open PowerShell, navigate to the folder, and run:
+          <pre style="background:var(--bg-card); padding:10px 14px; border-radius:6px; margin:8px 0; font-family:var(--font-mono); font-size:13px; border:1px solid var(--border);">python tools\editor\server.py</pre>
+        </li>
+      </ul>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">🛡️</div>
+        <div class="callout-body">
+          <strong>Duplicate Launch Protection:</strong>
+          If the editor is already running, starting a second copy will print:
+          <code>Editor is already running on port 5000 (started HH:MM:SS). Close that window first.</code>
+          This protects your CSV files and prevents background conflicts.
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: REVIEW WORKSPACE OVERVIEW -->
+    <section id="review-overview" class="guide-section">
+      <h2 class="section-heading">🖥️ Review Editor Workspace Overview</h2>
+      <p>When you load a game (e.g. <code>2026-03-29</code>), the interface is split into three coordinated zones:</p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Review Editor — Full Workspace (1600×1000)</span>
+        </div>
+        <img src="/guide/images/review_main.png?v=202610301350" alt="Review Editor Workspace" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 1:</strong> The 3-panel workspace: <strong>Left</strong> = Times Table; <strong>Center</strong> = Video & Timeline Slider; <strong>Right</strong> = Inspector Panel.
+        </div>
+      </div>
+
+      <h3 class="sub-heading">🖥️ Viewport Auto-Fit & Splitters</h3>
+      <ul class="feature-list">
+        <li><strong>Zero-Scrollbar Layout:</strong> The interface is engineered to fit within your browser window with zero page-level scrollbars at standard resolutions (1600×900, 1920×1080).</li>
+        <li><strong>Auto 16:9 Max Fill (<kbd>Fit: Auto ⤢</kbd>):</strong> The video player automatically maximizes vertical height while strictly preserving a 16:9 video aspect ratio. The active <code>Fit: Auto ⤢</code> pill in the top-right video meta bar confirms this mode.</li>
+        <li><strong>Horizontal Video Resizer:</strong> Drag the horizontal splitter bar below the video player up or down to customize video height to your preference. The pill updates to <code>Fit: Custom ↕</code>. If you shrink the video, the bottom controls panel automatically expands cleanly with zero dark dead space underneath.</li>
+        <li><strong>Double-Click or Pill Reset:</strong> Clicking the <code>Fit: Custom ↕</code> pill or double-clicking the horizontal resizer instantly snaps the video back to pure <code>Fit: Auto ⤢</code>.</li>
+        <li><strong>Vertical Column Splitter:</strong> Drag the vertical divider between the times table and video player to rebalance horizontal screen real estate.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION: SMARTPHONE INGESTION -->
+    <section id="phone-dump-ingestion" class="guide-section">
+      <h2 class="section-heading">📱 Ingesting Match Footage & App Dump from Smartphone</h2>
+      <p>
+        After recording a match, transferring everything from your smartphone to your PC takes less than two minutes. You only need to copy two folders — no hunting for individual files:
+      </p>
+
+      <div class="callout callout-info" style="margin-bottom: 16px;">
+        <div class="callout-icon">🔌</div>
+        <div class="callout-body">
+          <strong>Step 1: Connect Phone in Transfer Mode</strong><br>
+          Connect your Android smartphone to your PC via USB. On the phone screen, select <strong>File Transfer / MTP (Transfer files)</strong> mode.
+        </div>
+      </div>
+
+      <div class="callout callout-info" style="margin-bottom: 16px;">
+        <div class="callout-icon">📁</div>
+        <div class="callout-body">
+          <strong>Step 2: Create a Match Folder on PC</strong><br>
+          In your project workspace (the project folder), create a new folder named after the match date formatted as <code>MM-DD-YY</code> (for example, <code>04-01-26</code>).
+        </div>
+      </div>
+
+      <h3 class="sub-heading">📂 What to Copy (Grab the Entire Folders)</h3>
+      <table class="recipe-table" style="width: 100%; margin: 12px 0;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Item</th>
+            <th style="width: 45%;">Where to find it on Phone (Internal Storage)</th>
+            <th style="width: 30%;">Where to copy on PC (e.g. <code>04-01-26/</code>)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Match Videos</strong></td>
+            <td><code>DCIM/XbotGo/</code> (or <code>DCIM/</code>)</td>
+            <td>Copy directly into <code>&lt;day&gt;/Videos/</code> or <code>&lt;day&gt;/DCIM/</code></td>
+          </tr>
+          <tr>
+            <td><strong>2. Entire App Dump</strong></td>
+            <td><code>Android/data/com.blink.blinkfocos/</code></td>
+            <td>Copy the entire <strong><code>com.blink.blinkfocos</code></strong> folder directly into <code>&lt;day&gt;/</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-warning" style="margin: 14px 0;">
+        <div class="callout-icon">✨</div>
+        <div class="callout-body">
+          <strong>Zero Hunting Required:</strong> Do not search for individual log files, <code>time.txt</code>, or metadata. Just grab the entire <strong><code>com.blink.blinkfocos</code></strong> folder. The Review Editor's discovery engine automatically walks the folder and extracts all tracking logs, court calibrations, and timestamps.
+        </div>
+      </div>
+
+      <h3 class="sub-heading">⚡ 1-Click Auto-Generation in Review Editor</h3>
+      <p>
+        Once both folders are copied into your match directory (e.g. <code>04-01-26\</code> inside the project folder):
+      </p>
+      <ol class="feature-list">
+        <li>Click the <strong>📅 Calendar</strong> button on the top bar of the Review Editor.</li>
+        <li>The match date will automatically appear with a green badge: <span style="background:rgba(16, 185, 129, 0.15); color:#10B981; padding:2px 8px; border-radius:10px; font-weight:700;">Video dump detected</span>.</li>
+        <li>Click on that date. The editor automatically parses the telemetry, aligns timestamps, constructs the match timeline, and generates the initial review table in one click!</li>
+      </ol>
+    </section>
+
+    <!-- SECTION: APP MENU & TOOLS -->
+    <section id="app-menu-section" class="guide-section">
+      <h2 class="section-heading">☰ The Application Menu (☰ Menu ▾)</h2>
+      <p>To provide clean, immediate desktop ergonomics, the <strong>☰ Menu ▾</strong> button sits first on the far left of the top bar, followed by the game selector, calendar button, and game settings:</p>
+
+      <ul class="feature-list">
+        <li><strong>⚙️ Game Setup...</strong>: Configure match name, home & opponent teams, crests, league logos, scores, browse recording dumps from calendar, and generate title cards.</li>
+        <li><strong>👥 Team Roster...</strong>: Open the high-contrast spreadsheet modal to edit player jersey numbers, full names, short names, and parent contact emails with automatic bidirectional Google Sheet sync and local caching.</li>
+        <li><strong>🌟 Featured Player & Reels...</strong>: Open the team roster, select featured player(s), and generate player highlight reels.</li>
+        <li><strong>🚀 Final 4K Production...</strong>: Run automated pre-flight checks, generate the master batch script (<code>run_everything_&lt;date&gt;.bat</code>), and launch 4K encoding.</li>
+        <li><strong>🧹 Tidy Output Folder...</strong>: Reorganize match outputs into canonical subfolders (<code>final/</code>, <code>work/</code>, <code>_to_delete/</code>) with preview dry-run.</li>
+        <li><strong>🔄 Re-cut Changed Clips</strong>: Fast local cut of all edited clips and instant regeneration of the local preview reel.</li>
+        <li><strong>📖 User Guide</strong>: Open this interactive user guide.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION: TEAM ROSTER MANAGEMENT -->
+    <section id="team-roster-section" class="guide-section">
+      <h2 class="section-heading">👥 Team Roster Management (☰ Menu ▾ → Roster...)</h2>
+      <p>
+        Click <strong>☰ Menu ▾ → Roster...</strong> to open the full-screen Team Roster modal. This provides an editable spreadsheet interface to manage player records with automatic bidirectional synchronization between your local computer and your remote Google Sheet (<strong>Roster</strong> tab).
+      </p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Team Roster Management Modal (Spreadsheet View)</span>
+        </div>
+        <img src="/guide/images/roster_modal_detail.png?v=202610301350" alt="Team Roster Modal Detail" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure:</strong> Team Roster spreadsheet editor with Jersey No, Player Name, Short Name, Parent Contact Email, live Google Sheet sync status badge, and Pull/Save actions.
+        </div>
+      </div>
+
+      <h3 class="sub-heading">✨ Key Roster Features</h3>
+      <ul class="feature-list">
+        <li><strong>High-Contrast Spreadsheet Styling:</strong> Clean black-on-white layout with distinct columns: <code>No</code> (centered), <code>Player Name</code>, <code>Short Name</code> (used on title cards), and <code>Contact / Parent Email</code>.</li>
+        <li><strong>Exact Order Preservation:</strong> Preserves the exact original row sequence from your Google Sheet without forced sorting or rearrangement.</li>
+        <li><strong>Add & Delete Players:</strong> Click <strong>➕ Add Player</strong> to append a new row, or click <strong>🗑️</strong> to remove a player.</li>
+        <li><strong>Dual-Target Save:</strong> Clicking <strong>💾 Save Roster</strong> writes directly to your local cache at <code>out/reviewed/roster.csv</code> (with an automated timestamped <code>.bak</code> backup) and updates the Google Sheet <code>Roster</code> worksheet simultaneously.</li>
+        <li><strong>Cache Freshness & Pull:</strong> The modal continuously verifies freshness against Google Sheet. If updates were made directly in Google Sheets, click <strong>⬇️ Pull from Google Sheet</strong> to re-sync local cache instantly.</li>
+        <li><strong>Downstream Script Integration:</strong> Highlight reels (<code>make_reels.py</code>) and clip slicing (<code>cut_reviewed.py</code>) automatically read full names, numbers, and parent emails directly from this unified cache.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION: GAME SETUP WIZARD -->
+    <section id="game-setup-wizard" class="guide-section">
+      <h2 class="section-heading">⚙️ Game Setup Wizard & Title Cards</h2>
+      <p>When loading a brand-new match, the wizard prompts you to configure all game metadata in one place:</p>
+
+      <ul class="feature-list">
+        <li><strong>Match Name (CSV Game Column):</strong> E.g. <code>2026-03-29 Apex Rovers v Horizon City SC</code>. Saving propagates this match name to the <code>game</code> column across all active rows in the review CSV!</li>
+        <li><strong>Home Team & Crest:</strong> Pre-filled from your configured defaults (e.g. <strong>Apex Rovers</strong> with your official club crest).
+        <li><strong>⚙️ Defaults Configuration (<code>⚙️ Defaults...</code> button):</strong> Located at the top right of the Game Setup header. Allows configuring your team name, home/away role, crest, default league, featured spotlight players, and Google Sheet spreadsheet ID in <code>config/game_defaults.json</code>. These defaults automatically prefill all new game setups!</li> You can customize the name, pick any logo from <code>shared/team_logos/</code>, or upload a new crest with <code>➕ Upload Logo...</code>.</li>
+        <li><strong>Opponent Team & Crest:</strong> Type the opponent name (with autocomplete suggestions from logo files) and select their official club crest.</li>
+        <li><strong>League Competition:</strong> Switch between the leagues listed in <code>config/game_defaults.json</code>, or <strong>Other (Custom)</strong>. Selecting "Other" allows entering a custom competition name and selecting or uploading a custom competition logo.</li>
+        <li><strong>Scores & Strict Validation:</strong> Enter final score (e.g. <code>6-0</code>) and halftime score (e.g. <code>3-0</code>). Team names cannot be empty and scores must match standard <code>H-A</code> format.</li>
+        <li><strong>Logo Upload (<code>➕ Upload Logo...</code>):</strong> Direct in-browser upload of transparent PNG or JPG logos into <code>shared/team_logos/</code> with automatic filename sanitization, immediate preview selection, and overwrite protection.</li>
+        <li><strong>Google Sheet Tab Auto-Rename:</strong> When saving game setup info, the sheet sync service automatically renames the target worksheet tab in your Google Sheet in place (e.g. <code>10/25 Apex v Horizon</code>) to keep your workbook organized without duplicating tabs.</li>
+        <li><strong>🎦 Generate Cards Button:</strong> Click this button inside the wizard to generate Intro, Halftime, and Outro title cards immediately (<code>make_reels.py --stage cards</code>). If team names, scores, or logos change later, the editor detects stale cards and prompts you to regenerate them.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION: FEATURED PLAYER -->
+    <section id="featured-player-section" class="guide-section">
+      <h2 class="section-heading">🌟 Featured Player & Highlight Reels</h2>
+      <p>You can create dedicated spotlight reels for any player on your roster:</p>
+
+      <ul class="feature-list">
+        <li><strong>Live Match Clip Counts:</strong> The roster table analyzes your review CSV in real time and displays how many non-skipped clips feature each player.</li>
+        <li><strong>Multi-Player Selection:</strong> Check one or multiple players (defaults to your configured featured player, e.g. #11). The reel generator will build dedicated spotlight reels for every selected player in one pass!</li>
+        <li><strong>Automatic 0-Clip Skipping:</strong> Players who did not participate in any clips in this match are greyed out with a <code>(0 clips - skipped)</code> badge so you never waste time rendering empty reels.</li>
+        <li><strong>Stage Choice:</strong> Choose between <strong>Full Pipeline</strong> (cards → 4K clips → 4K replays → reels) or <strong>Reels Only</strong> (fast re-assembly of existing clips).</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 4: TIMES TABLE -->
+    <section id="times-table" class="guide-section">
+      <h2 class="section-heading">📋 The Times Table (Left Pane)</h2>
+      <p>The table displays all detected game marks, goal attempts, fouls, and manual bookmarks in chronological order:</p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Times Table Close-up</span>
+        </div>
+        <img src="/guide/images/review_table_detail.png?v=202610301350" alt="Times Table Details" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 2:</strong> Table showing clip numbering, combined Type & Mark time pill (<kbd>M (2:43)</kbd>, <kbd>G (8:48)</kbd>), clickable 3-cell timing buttons (<kbd>Start</kbd>, <kbd>Event</kbd>, <kbd>End</kbd>), player number, instruction chips (<span class="chip chip-zoom">ZOOM 🔍</span>, <span class="chip chip-skip">SKIP</span>), and notes.
+        </div>
+      </div>
+
+      <h3 class="sub-heading">Key Table Features:</h3>
+      <ul class="feature-list">
+        <li><strong>Click Row to Jump (Seek to Start):</strong> Clicking anywhere on a table row (or navigating with <kbd>ArrowUp</kbd> / <kbd>ArrowDown</kbd>) immediately seeks the video to that row's <code>action_start</code> timestamp (falling back to mark if start is unconfigured) and centers the 30-second timeline slider, so review and tuning playback begins right before the play unfolds. Clicking the <kbd>Type (Mark)</kbd> pill specifically seeks the video to the mark.</li>
+        <li><strong>Ground-Truth Mark Immutability:</strong> Match marks (<code>video_time</code>) are recorded directly from the gimbal and smartphone during the match and serve as immutable ground truth. Marks cannot be edited, typed over, or dragged on the slider. If a mark was placed poorly or isn't needed, flag the clip with <kbd>X</kbd> (<span class="chip chip-skip">SKIP</span>); if a key play was missed during recording, press <kbd>Insert</kbd> to add a net-new row at the current playhead.</li>
+        <li><strong>Click Time Cells to Jump:</strong> Clicking any time cell (<kbd>Type (Mark)</kbd>, <kbd>Start</kbd>, <kbd>Event</kbd>, or <kbd>End</kbd>) seeks the video immediately to that exact second and highlights the corresponding timing line with a blue glow.</li>
+        <li><strong>Typing a time:</strong> double-click (or click the pencil on) a Start, Event or End time, type <code>mm:ss</code>, then press <kbd>Enter</kbd> to commit or <kbd>Esc</kbd> to cancel. <kbd>Tab</kbd> commits and moves straight to the next time of the same row (<kbd>Shift</kbd>+<kbd>Tab</kbd> goes back), so you can type Start, Tab, Event, Tab, End without touching the mouse. Typed digits never trigger the 1/2/3, <kbd>Z</kbd> or <kbd>X</kbd> hotkeys while a time field is open.</li>
+        <li><strong>Double-Click to Edit:</strong> Double-click <kbd>Start</kbd>, <kbd>Event</kbd>, or <kbd>End</kbd> to type a replacement timestamp (e.g. <code>12:45</code>). Press <kbd>Enter</kbd> to commit.</li>
+        <li><strong>Unreviewed Replay Badges (<span class="chip" style="background:rgba(245,158,11,0.15);color:#F59E0B;border:1px solid rgba(245,158,11,0.4);">UNREVIEWED</span>):</strong> Clips marked for zoom that have not yet had their replay crop visually confirmed display an amber badge directly adjacent to <span class="chip chip-zoom">ZOOM 🔍</span>, making it effortless to scan down the table and find replays needing review.</li>
+        <li><strong>Dirty Tracking (<kbd>*</kbd>):</strong> Any row with unsaved changes immediately displays an asterisk next to its clip number (e.g. <code>5*</code>). Saving with <kbd>Ctrl + S</kbd> clears the asterisks.</li>
+        <li><strong>Manual Rows (<kbd>➕ Add row</kbd>):</strong> Press <kbd>Insert</kbd> to insert a new row right at the current video playhead. It pre-fills <code>notes: manual</code>, calculates the 24-hour clock and game clock, and renumbers clips dynamically.</li>
+        <li><strong>Column & Video Splitters:</strong> Drag the vertical divider between the table and video to rebalance pane widths, or drag the horizontal splitter under the video player to adjust video height!</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 5: DUAL-SCALE TIMELINE SLIDER -->
+    <section id="dual-timeline" class="guide-section">
+      <h2 class="section-heading">🔍 Dual-Scale Timeline Slider</h2>
+      <p>Precision editing requires both micro-second dragging and full-match awareness. The Review Editor provides two interchangeable timeline modes:</p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Timeline Slider & Action Controls</span>
+        </div>
+        <img src="/guide/images/review_timeline_detail.png?v=202610301350" alt="Timeline Slider Close-up" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 3:</strong> High-resolution 30-second timeline slider with draggable handles for Start (blue), Event (amber), End (red), non-sliding reference handle for MARK (green), and Playhead.
+        </div>
+      </div>
+
+      <h3 class="sub-heading">The Two Modes (Toggle with <kbd>F</kbd>):</h3>
+      <table class="guide-table">
+        <thead>
+          <tr>
+            <th>Mode</th>
+            <th>Window Span</th>
+            <th>Ruler Intervals</th>
+            <th>Primary Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🔍 30s Zoom (Default)</strong></td>
+            <td>Centers a 30s window around mark (<code>[mark - 15s, mark + 15s]</code>)</td>
+            <td>Major ticks every <strong>5s</strong>, minor ticks every 1s</td>
+            <td>Dragging handles with 0.1s precision so shots aren't cut off</td>
+          </tr>
+          <tr>
+            <td><strong>🌐 Full Match (5m)</strong></td>
+            <td>Entire video duration (<code>[00:00, Match End]</code>)</td>
+            <td>Major ticks every <strong>5 minutes</strong> (<code>05:00</code>, <code>10:00</code>...)</td>
+            <td>Macro match scrubbing and jumping across halves</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">🎯</div>
+        <div class="callout-body">
+          <strong>Draggable Handles:</strong>
+          Grab any colored handle directly with your mouse. As you drag, the video updates in real time so you can match the cut to the exact kick of the ball.
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: ACTION LOOP PLAYBACK -->
+    <section id="action-loop" class="guide-section">
+      <h2 class="section-heading">🔁 Action Window Looping (<kbd>Ctrl + Enter</kbd>)</h2>
+      <p>
+        Want to inspect a tackle or goal repeatedly while tweaking the start and end points? Click <strong>🔁 Loop Action</strong> or press <kbd>Ctrl + Enter</kbd>.
+      </p>
+      <p>
+        The player continuously loops playback between <code>action_start</code> and <code>action_end</code>. While looping, you can drag the handles or press hotkeys <kbd>1</kbd> and <kbd>3</kbd> to adjust the boundaries on the fly!
+      </p>
+    </section>
+
+    <!-- SECTION 7: VISUAL ZOOM REPLAY EDITOR -->
+    <section id="zoom-intro" class="guide-section">
+      <h2 class="section-heading">🎬 Visual Zoom Replay Editor (<kbd>/zoom/...</kbd>)</h2>
+      <p>
+        The Chameleon gimbal captures high-resolution 4K wide-angle footage. The <strong>Zoom Replay Editor</strong> lets you craft professional close-up action replays that pan smoothly across the pitch:
+      </p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Zoom Replay Editor — Clip 7 (goal_001807)</span>
+        </div>
+        <img src="/guide/images/zoom_main.png?v=202610301350" alt="Zoom Replay Editor Workspace" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 4:</strong> The visual Zoom Editor interface featuring the 16:9 crop box, transport stepping bar, scrubber track with trims and keyframes, and the settings sidebar.
+        </div>
+      </div>
+
+      <h3 class="sub-heading" id="zoom-launch">How to Open a Zoom Clip</h3>
+      <p>
+        In the Review Editor table, any row with a <span class="chip chip-zoom">ZOOM 🔍</span> chip opens the dedicated visual editor tab. You can also press <kbd>Z</kbd> on any row in the Review Editor to toggle the zoom instruction on or off.
+      </p>
+    </section>
+
+    <!-- SECTION 8: CROP BOX & KEYFRAMES -->
+    <section id="zoom-cropbox" class="guide-section">
+      <h2 class="section-heading">🔲 START Anchor vs Pan Keyframes</h2>
+      <p>
+        The Zoom Editor features an intelligent 2-mode visual framing system:
+      </p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Zoom Video Stage Close-up</span>
+        </div>
+        <img src="/guide/images/zoom_stage_detail.png?v=202610301350" alt="Zoom Stage Detail" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 5:</strong> Amber crop box anchored at the start of the replay, with persistent keyframe hint bar below.
+        </div>
+      </div>
+
+      <table class="guide-table">
+        <thead>
+          <tr>
+            <th>Mode</th>
+            <th>Border Color</th>
+            <th>What It Controls</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unplaced Stage State</strong></td>
+            <td><strong style="color:var(--text-muted);">Dashed / No Box</strong></td>
+            <td>New replays start with no crop box. Click anywhere on the video stage to center the box on your player, or click <strong>📐 Auto-frame</strong> to apply standard upper-midfield framing.</td>
+          </tr>
+          <tr>
+            <td><strong>START Anchor Box</strong></td>
+            <td><strong style="color:var(--accent-amber);">Amber (#FFA000)</strong></td>
+            <td>The framing at the very beginning of the replay window (elapsed time = 0.0s). Dragging this sets <code>baseCrop</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>Pan Keyframe Box</strong></td>
+            <td><strong style="color:var(--accent-blue);">Blue (#29B6F6)</strong></td>
+            <td>The target framing at a later timestamp. The camera smoothly glides from the START box to this position.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sub-heading" id="zoom-unplaced-framing">📐 Unplaced Replay Stage & Auto-Frame</h3>
+      <p>
+        Brand-new zoom replays start in an <strong>Unplaced</strong> state to prevent silent off-target center renders:
+      </p>
+      <ul class="feature-list">
+        <li><strong>Stage Click-to-Frame:</strong> Simply click on the video stage where the action is taking place; the 16:9 crop box immediately drops centered on your click coordinate.</li>
+        <li><strong>📐 Auto-frame Button:</strong> Centers the box at <code>[1152, 450]</code> (2.5x zoom) (safe upper midfield) and flags it as auto-placed awaiting your review.</li>
+        <li><strong>Auto-frame All Unplaced:</strong> One-click convenience to apply upper-midfield framing to every unplaced replay across the entire game at once.</li>
+        <li><strong>👍 Looks Good Approval:</strong> Auto-framed clips remain marked <code>UNREVIEWED</code> until either nudged/adjusted or explicitly approved by clicking <strong>👍 Looks Good</strong> next to Save Plan. Visiting an auto-placed clip and pressing Save without reviewing it will not silently approve it.</li>
+      </ul>
+
+      <h3 class="sub-heading" id="zoom-pan-keyframe">🎯 How to Add a Pan Keyframe in 3 Steps:</h3>
+      <div class="step-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title">Step to a Later Moment</div>
+          <div class="step-desc">Use <kbd>Space</kbd> or <kbd>D</kbd>/<kbd>W</kbd> to advance the playhead to where the ball carrier has moved.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title">Press <kbd>K</kbd> (Keyframe)</div>
+          <div class="step-desc">Press <kbd>K</kbd> or click <code>➕ Add Pan at Playhead</code>. A blue diamond appears on the scrubber track.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title">Drag the Box</div>
+          <div class="step-desc">Drag the crop box onto the player. The box turns <strong>Blue</strong> to confirm you are editing the pan target!</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>Drag Intent Protection:</strong>
+          If you accidentally drag the box at a later moment without pressing <kbd>K</kbd> first, a friendly toast appears:
+          <em>"Moved the START box. Press K first to add a pan at this time"</em> with a button:
+          <strong>[Make this a pan keyframe instead]</strong>. Clicking it restores your START box and creates the pan keyframe instantly!
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 9: ZOOM INSPECTOR & SETTINGS -->
+    <section id="zoom-inspector" class="guide-section">
+      <h2 class="section-heading">🎛️ Zoom Inspector & Action Bar</h2>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Zoom Inspector Sidebar</span>
+        </div>
+        <img src="/guide/images/zoom_inspector_detail.png?v=202610301350" alt="Zoom Inspector Detail" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 6:</strong> Zoom slider (1.5x–5.0x) with preset chips, window offset adjustments, trims, keyframe list with Glide/Snap toggle, and homography (stabilization) status: <em>Ready (H.json)</em> means the file matches the current framing; <em>Ready (reused from older plan)</em> means an older H.json exists but the framing changed, so click <strong>Compute H.json</strong> to refresh it before rendering.
+        </div>
+      </div>
+
+      <h3 class="sub-heading" id="zoom-numeric-inputs">🔢 Precision Typed Inputs: Replay Window, Trims & Freeze Hold</h3>
+      <p>
+        The Replay Window offsets (<strong>Window Start</strong>, <strong>Window End</strong>), <strong>Cut Trims</strong>, and <strong>Freeze Hold</strong> are precision typed numeric fields. Dragging handles on the scrubber controls video scrubbing and keyframe placement; adjusting replay window boundaries is done by typing exact float values into these inputs (e.g. type <code>-5.5</code> or <code>+2.5</code>, then press <kbd>Tab</kbd> or <kbd>Enter</kbd>).
+      </p>
+      <ul class="feature-list">
+        <li><strong>Window Start Offset:</strong> Sets how many seconds before the event the slow-motion replay begins (default: <code>-2.5s</code>). When you adjust the Start Offset, the START anchor moment shifts in source time. The editor immediately warns you with a toast notification to verify framing and automatically seeks the video playhead to the new start moment so you can confirm or reposition the amber crop box.</li>
+        <li><strong>Window End Offset:</strong> Sets how many seconds after the event the replay ends (default: <code>+2.0s</code>). Increase this (e.g. to <code>+3.0s</code>) to capture lingering post-goal celebrations.</li>
+        <li><strong>Live Duration Readout:</strong> The sidebar displays a live duration readout (e.g. <code>8.0s source = 16.0s replay</code>) so you immediately see the impact at 0.5x slow-motion.</li>
+        <li><strong>Status Badge Tracking & Stale Detection:</strong> If a replay was previously rendered and you subsequently modify its window offsets, trims, or crop box, the editor immediately marks its status badge as <span style="background:rgba(245, 158, 11, 0.22); color:#F59E0B; padding:2px 8px; border-radius:10px; font-weight:700; border:1px solid rgba(245, 158, 11, 0.55);">RENDERED (stale)</span> in amber. This alerts you that the rendered review file and downstream 4K master are out of date until re-rendered.</li>
+      </ul>
+
+      <h3 class="sub-heading" id="zoom-preview">▶️ Instant Replay Preview (<kbd>R</kbd>)</h3>
+      <p>
+        Press <kbd>R</kbd> or click <strong>▶ Preview Replay (R)</strong>. The video plays at 0.5x slow-motion while the on-screen crop box animates smoothly along your exact smoothstep glide path. This lets you verify the framing in real time without rendering a single frame!
+      </p>
+
+      <h3 class="sub-heading" id="zoom-unreviewed-blocking">⚠️ Quality Framing Guarantee: Unreviewed Crop Blocking</h3>
+      <p>
+        The Chameleon gimbal tracking operates in sensor space and has mechanical pan lag. Silent center crops (<code>[1152, 648]</code>) often result in empty grass or missed shots. To prevent unwatchable footage:
+      </p>
+      <ul class="feature-list">
+        <li><strong>Silent Center Crops Never Render:</strong> An unreviewed or auto-placed zoom clip strictly blocks both single-clip and batch rendering until you frame the box and save the plan (<kbd>Ctrl + S</kbd>).</li>
+        <li><strong>Unreviewed Clips Block List:</strong> Clicking "Render all zoom clips" when unreviewed clips exist opens a modal listing every unreviewed clip with direct clickable links so you can jump straight to them.</li>
+        <li><strong>Render Reviewed Only:</strong> Need a fast preview of already-framed clips? The modal offers a <strong>"Render Reviewed Only (X clips)"</strong> button to render only what you have approved.</li>
+        <li><strong>Honest Final Status:</strong> If <code>verify_zoom.py</code> reports any clips as <code>MISSING</code> or <code>FLAGGED</code>, the log drawer turns RED and reports a failed status. It will never falsely claim success when clips are missing.</li>
+        <li><strong>Server-Side Log Persistence:</strong> Task logs are saved to <code>tmp/task_logs/</code> on disk. Closing the browser tab or restarting the server will never wipe out your render history.</li>
+      </ul>
+
+      <h3 class="sub-heading" id="zoom-render">⚡ Render Exact & Verify</h3>
+      <p>
+        When you are happy with the framing, click <strong>⚡ Render exact</strong>.
+      </p>
+
+      <div class="screenshot-frame">
+        <div class="screenshot-header">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span>Zoom Action Bar & Render Slot</span>
+        </div>
+        <img src="/guide/images/zoom_actions_detail.png?v=202610301350" alt="Zoom Bottom Actions" class="screenshot-img">
+        <div class="screenshot-caption">
+          <strong>Figure 7:</strong> Bottom action bar with Auto start, Save Plan, Preview Replay, Render Exact, and the reserved status slot.
+        </div>
+      </div>
+
+      <p>
+        The app executes the 720p render in the background and opens the docked <strong>Streaming Log Drawer</strong>. When finished, it automatically runs <code>verify_zoom.py</code> and flashes a green <span style="background:#1B432C; color:#72E098; padding:2px 8px; border-radius:4px; font-weight:700;">PASS: 1 checked, 0 flagged</span> badge. You can click <strong>🎬 Watch Final Replay</strong> to watch the finished mp4 in-page!
+      </p>
+
+      <h3 class="sub-heading" id="zoom-remove-restore">↩️ Remove & Restore Zoom (Undo Safety)</h3>
+      <p>
+        Decided this clip doesn't need a zoom replay?
+      </p>
+      <ul class="feature-list">
+        <li><strong>Remove zoom:</strong> Click <strong>Remove zoom</strong>. An in-page confirmation modal asks you to confirm. It removes the <code>zoom</code> flag from the CSV and moves the replay to <code>removed</code> in <code>zoom_state.json</code>.</li>
+        <li><strong>Restore zoom:</strong> Changed your mind? A <strong>Restore zoom</strong> button immediately appears! Clicking it restores the CSV flag and moves the saved replay back from <code>removed</code> with byte-identical safety.</li>
+      </ul>
+
+      <h3 class="sub-heading" id="zoom-unsaved-guard">🛡️ Unsaved Changes Guard (Keep Editing / Discard / Save)</h3>
+      <p>
+        Accidental navigation or closure never loses your zoom work. If any edits were made to the crop box, zoom ratio, keyframes, replay window, or trims, attempting to return to the Review Editor (via <kbd>Escape</kbd>, clicking the <code>← Return to Review</code> button, or closing the tab) immediately opens the <strong>Unsaved Zoom Changes</strong> guard modal:
+      </p>
+      <ul class="feature-list">
+        <li><strong>Keep Editing:</strong> Closes the dialog and stays in the Zoom Editor right where you were.</li>
+        <li><strong>Discard Changes:</strong> Reverts all unsaved changes and returns directly to the Review Editor.</li>
+        <li><strong>Save & Return:</strong> Saves your zoom plan to <code>zoom_state.json</code> and returns to the Review Editor in a single click.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION: FINAL 4K PRODUCTION -->
+    <section id="final-production-section" class="guide-section">
+      <h2 class="section-heading">🚀 Final 4K Production</h2>
+      <p>
+        When all clip timings and zoom replays are verified, click <strong>☰ Menu ▾ → Final 4K Production...</strong>:
+      </p>
+
+      <div class="step-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title">Automated Pre-Flight & Duration Estimate</div>
+          <div class="step-desc">Validates game setup, roster presence, title cards, 0 unreviewed zoom clips, valid timing order, and 20+ GB disk space. Displays estimated total render time (e.g. <code>~1.8 hours (107 min)</code>).</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title">🔍 Dry Run Verification</div>
+          <div class="step-desc">Click <strong>🔍 Dry Run</strong> to simulate batch generation and verify every command line without invoking ffmpeg.</div>
+          <div class="step-desc" style="margin-top:6px; font-size:13px;">
+          <strong>What the run file is:</strong> <code>run_everything_&lt;date&gt;.bat</code> is only a one-line launcher for <code>tools\pipeline\run_everything.py</code> (title cards → full game → 4K clips/replays/reels → output check). The Python runner does the work, skips finished pieces, and writes <code>run_everything_&lt;date&gt;.log</code>, which ends with <code>ALL OK</code> when every check passes. Press <strong>Start</strong> again after a Cancel or restart and it resumes where it stopped.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title">Typed "START" Confirmation</div>
+          <div class="step-desc">Type <code>START</code> to unlock the launch button, guaranteeing no accidental multi-hour encoding runs.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-title">Detached Visible Console Runner</div>
+          <div class="step-desc">Runs in an independent console window that survives browser closing. Writes to <code>run_everything_&lt;date&gt;.log</code> and saves PID.</div>
+        </div>
+      </div>
+
+      <h3 class="sub-heading">Production Protection & Controls:</h3>
+      <ul class="feature-list">
+        <li><strong>Modifying Action Locks:</strong> While production is running, actions that could alter output files (Re-cut, Render Zoom, Generate Cards, Generate Reels) are locked and return <code>409 Conflict</code>. A prominent banner displays: <em>"Production is currently running. Editing actions are locked."</em></li>
+        <li><strong>⏹ Cancel Run:</strong> Need to stop encoding? Click <strong>⏹ Cancel Run</strong> in the production dialog. It terminates the entire process tree cleanly via <code>taskkill /F /T</code>, appends <code>[CANCELLED BY USER]</code> to the log, and unlocks the workspace.</li>
+        <li><strong>Strict Batch Execution Order:</strong> <code>make_run_all.py</code> enforces strict stage dependencies:
+          <ol style="margin-left:24px; margin-top:6px;">
+            <li><strong>Title cards:</strong> <code>make_reels.py --stage cards</code></li>
+            <li><strong>Full game video:</strong> concatenated multi-batch footage</li>
+            <li><strong>4K clips, replays & highlight reels:</strong> <code>make_reels.py --stage all</code></li>
+            <li><strong>Checks:</strong> automated length and file integrity verification</li>
+          </ol>
+        </li>
+      </ul>
+    </section>
+
+    <!-- SECTION 10: KEYBOARD SHORTCUTS CHEAT SHEET -->
+    <section id="shortcuts-cheat-sheet" class="guide-section">
+      <h2 class="section-heading">⌨️ Keyboard Shortcuts Cheat Sheet</h2>
+      <p>Master these shortcuts to review games twice as fast:</p>
+
+      <table class="guide-table">
+        <thead>
+          <tr>
+            <th>Shortcut</th>
+            <th>Review Editor Action</th>
+            <th>Zoom Editor Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><kbd>Space</kbd></td>
+            <td>Play / Pause normal video</td>
+            <td>Play / Pause 0.5x slow-motion preview</td>
+          </tr>
+          <tr>
+            <td><kbd>1</kbd></td>
+            <td>Set <code>action_start</code> at playhead</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>2</kbd></td>
+            <td>Set <code>event</code> at playhead</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>3</kbd></td>
+            <td>Set <code>action_end</code> at playhead</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl + Enter</kbd></td>
+            <td>Toggle <strong>Action Window Loop</strong></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>F</kbd></td>
+            <td>Toggle timeline: <strong>30s Zoom</strong> ↔ <strong>5m Full</strong></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>Z</kbd></td>
+            <td>Toggle <code>zoom</code> tag on selected row</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>X</kbd></td>
+            <td>Toggle <code>skip</code> tag on selected row</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>K</kbd></td>
+            <td>—</td>
+            <td><strong>Add Pan Keyframe</strong> at playhead</td>
+          </tr>
+          <tr>
+            <td><kbd>R</kbd></td>
+            <td>—</td>
+            <td><strong>Play Replay Preview</strong> (animated box)</td>
+          </tr>
+          <tr>
+            <td><kbd>A</kbd> / <kbd>D</kbd> or <kbd>,</kbd> / <kbd>.</kbd></td>
+            <td>Step backward / forward 1 frame</td>
+            <td>Step backward / forward 1 frame</td>
+          </tr>
+          <tr>
+            <td><kbd>S</kbd> / <kbd>W</kbd></td>
+            <td>—</td>
+            <td>Step backward / forward 0.5 seconds</td>
+          </tr>
+          <tr>
+            <td><kbd>Left</kbd> / <kbd>Right</kbd></td>
+            <td>Step -1s / +1s (Shift: -5s / +5s)</td>
+            <td>Step -1s / +1s</td>
+          </tr>
+          <tr>
+            <td><kbd>Up</kbd> / <kbd>Down</kbd></td>
+            <td>Select previous / next row in table</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>Insert</kbd></td>
+            <td><strong>Add new row</strong> at video playhead</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl + S</kbd></td>
+            <td><strong>Save CSV</strong> & push to Google Sheet</td>
+            <td><strong>Save Plan</strong> to <code>zoom_state.json</code></td>
+          </tr>
+          <tr>
+            <td><kbd>Ctrl + Z</kbd></td>
+            <td>Undo last table edit <em>(Note: saving with Ctrl+S commits edits to disk and resets undo stack; sibling .bak files preserve previous states)</em></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><kbd>Escape</kbd></td>
+            <td>Dismiss topmost active layer (confirm dialog → modal → menu dropdown)</td>
+            <td>Return to Review Editor (prompts with 3-button Unsaved Changes guard if unsaved)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 11: COMMON RECIPES -->
+    <section id="recipes" class="guide-section">
+      <h2 class="section-heading">💡 Common Editing Recipes</h2>
+
+      <h3 class="sub-heading">Recipe A: "The shot was cut off before entering the goal"</h3>
+      <ol style="margin-left: 20px; line-height: 1.8;">
+        <li>Select the goal row in the table. The timeline focuses on the 30s zoom window.</li>
+        <li>Drag the red <strong>End</strong> handle to the right until the ball clearly ripples the net.</li>
+        <li>Press <kbd>Ctrl + S</kbd>. Done!</li>
+      </ol>
+
+      <h3 class="sub-heading">Recipe B: "Adding a great build-up pass the AI missed"</h3>
+      <ol style="margin-left: 20px; line-height: 1.8;">
+        <li>Scrub the video to the pass moment.</li>
+        <li>Press <kbd>Insert</kbd> (or click <code>➕ Add row</code>).</li>
+        <li>A new row appears with <code>notes: manual</code>. Drag the green Start and red End handles to bracket the pass.</li>
+        <li>Press <kbd>Z</kbd> if you want a zoom replay for it!</li>
+      </ol>
+
+      <h3 class="sub-heading">Recipe C: "Tracking a striker sprinting across the penalty box"</h3>
+      <ol style="margin-left: 20px; line-height: 1.8;">
+        <li>Click <span class="chip chip-zoom">ZOOM 🔍</span> on the goal row to open the Zoom Editor.</li>
+        <li>Frame the striker at the start with the amber box (select <code>3.0x</code> zoom).</li>
+        <li>Press <kbd>Space</kbd> until the striker reaches the far post, then pause.</li>
+        <li>Press <kbd>K</kbd>, then drag the blue box onto the striker.</li>
+        <li>Press <kbd>R</kbd> to watch the camera glide smoothly across with the run.</li>
+        <li>Click <strong>⚡ Render exact</strong>. Verify the green PASS badge. You're done!</li>
+      </ol>
+
+      <h3 class="sub-heading">Recipe D: "Make a replay longer or shorter & rebuild 4K masters"</h3>
+      <ol style="margin-left: 20px; line-height: 1.8;">
+        <li>Open the replay in the Zoom Replay Editor by clicking <span class="chip chip-zoom">ZOOM 🔍</span> on its table row.</li>
+        <li>In the right Inspector panel under <strong>Replay Window</strong>, type new values into <strong>Start Offset</strong> (e.g. type <code>-5.5</code> to start 5.5s before the shot) or <strong>End Offset</strong> (e.g. type <code>+2.5</code> to capture celebrations).</li>
+        <li>Notice that changing Start Offset automatically moves the playhead to the new start moment with an on-screen prompt: verify that the amber crop box accurately frames the action at this earlier start moment.</li>
+        <li>Press <kbd>Ctrl + S</kbd> to save the plan. Notice the status badge reflects <span style="background:rgba(245, 158, 11, 0.22); color:#F59E0B; padding:2px 6px; border-radius:8px; font-weight:700;">RENDERED (stale)</span>. Click <strong>⚡ Render exact</strong> to re-render the 720p review preview.</li>
+        <li>To update your full-quality 4K deliverables, return to the Review Editor and open <strong>☰ Menu ▾ → 🚀 Final 4K Production...</strong>. The dialog will display a prominent <strong>⚠️ 4K Outputs Out of Date</strong> indicator listing your modified clips.</li>
+        <li>Click <strong>⚡ Rebuild Changed 4K Replays & Reels</strong>. In just ~5 to 8 minutes (~1m per modified 4K replay + ~3.5m highlight reels), the pipeline re-renders only the modified 4K replays and re-assembles the highlight reels (skipping all untouched clips!).</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 12: TROUBLESHOOTING & FAQ -->
+    <section id="troubleshooting" class="guide-section">
+      <h2 class="section-heading">❓ Troubleshooting & FAQ</h2>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <strong>"Editor is already running on port 5000":</strong>
+          You already have a server window open. Check your Windows taskbar for the running terminal, or close it before launching again.
+        </div>
+      </div>
+
+      <div class="callout callout-danger">
+        <div class="callout-icon">🔴</div>
+        <div class="callout-body">
+          <strong>Red "Server process is stale" top banner:</strong>
+          Python or HTML files were updated while the server was running. Simply close the server terminal and double-click <code>review_editor.bat</code> to restart fresh.
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">🧹</div>
+        <div class="callout-body">
+          <strong>Final 4K on a game you already tidied:</strong>
+          After <em>Tidy Output Folder</em> the timeline lives in <code>work\</code> and the finished videos in <code>final\</code>. The Final 4K dialog then shows only a short note with an <strong>↩ Untidy this game...</strong> button, because there is nothing left to produce (the checks, batch script and Start are hidden). To re-render a tidied game from scratch, open <em>Tidy Output Folder</em> and click <strong>↩ Untidy...</strong>: it previews, then moves <code>work\</code> and <code>final\</code> back into the game folder (nothing is overwritten); Tidy again when you are done.
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">📑</div>
+        <div class="callout-body">
+          <strong>"File Changed Elsewhere" when saving:</strong>
+          The reviewed file on disk changed after this page loaded it (a second browser tab, or a manual edit). Choose <em>Cancel</em>, reload the page to see the newer version, and redo your last edits; choose <em>Overwrite</em> only if the table on this page is the one you want. Closing or reloading the tab with unsaved edits also asks first.
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">⏱️</div>
+        <div class="callout-body">
+          <strong>Re-cut takes several minutes the first time:</strong>
+          Cutting every clip of a new game takes about 5-10 minutes; the Re-cut window lists <code>[3/25] ok ...</code> per clip. The Final 4K cmd window also prints one line per clip, per zoom replay and per reel. You can close the window; run Re-cut again after an interruption and finished clips are kept.
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">🔄</div>
+        <div class="callout-body">
+          <strong>Restarting the editor:</strong>
+          Start it with <code>review_editor.bat</code> (or <code>review_editor.sh</code>). Creating an empty file <code>tmp\restart_editor.flag</code> then makes the editor restart itself in the same window within a few seconds (it waits while a background job is running). An editor started any other way has to be closed and started again by hand.
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">💾</div>
+        <div class="callout-body">
+          <strong>Where are my edits saved?</strong>
+          All changes are saved to <code>out\reviewed\&lt;date&gt;_reviewed.csv</code> using strict 15-column atomic backups. Whenever you press <kbd>Ctrl + S</kbd>, the editor also automatically syncs the entire table directly to your game's Google Sheet tab!
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Quick search filter for sidebar links
+    function filterGuideNav() {
+      const q = document.getElementById('guideSearchInput').value.toLowerCase().trim();
+      const links = document.querySelectorAll('#sidebarNav a.nav-link');
+      links.forEach(l => {
+        const text = l.textContent.toLowerCase();
+        l.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+
+    // Active link highlighting on scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section.guide-section');
+      const scrollPos = window.scrollY + 100;
+      sections.forEach(s => {
+        const top = s.offsetTop;
+        const height = s.offsetHeight;
+        const id = s.getAttribute('id');
+        if (scrollPos >= top && scrollPos < top + height) {
+          document.querySelectorAll('#sidebarNav a.nav-link').forEach(a => {
+            if (a.getAttribute('href') === `#${id}`) {
+              a.classList.add('active');
+            } else {
+              a.classList.remove('active');
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
