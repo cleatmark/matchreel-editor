@@ -1,0 +1,30 @@
+[
+  {
+    "team": "Home FC",
+    "filename": "home_fc.png",
+    "filepath": "shared/team_logos/home_fc.png",
+    "size_bytes": 8834,
+    "source_url": ""
+  },
+  {
+    "team": "Guest FC",
+    "filename": "guest_fc.png",
+    "filepath": "shared/team_logos/guest_fc.png",
+    "size_bytes": 11635,
+    "source_url": ""
+  },
+  {
+    "team": "League A",
+    "filename": "league_a.png",
+    "filepath": "shared/team_logos/league_a.png",
+    "size_bytes": 12049,
+    "source_url": ""
+  },
+  {
+    "team": "League B",
+    "filename": "league_b.png",
+    "filepath": "shared/team_logos/league_b.png",
+    "size_bytes": 10645,
+    "source_url": ""
+  }
+]
