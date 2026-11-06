@@ -4,6 +4,6 @@
 HERE="$(cd "$(dirname "$0")" && pwd)"
 export XBOTGO_RESTART_LOOP=1
 while true; do
-  python3 "$HERE/tools/editor/server.py"
+  python3 "$HERE/editor/tools/editor/server.py"
   [ $? -eq 75 ] || break
 done

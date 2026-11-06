@@ -747,6 +747,45 @@ Tests run on a synthetic project that `make_test_root.py` generates with `fixtur
 5. **Game Setup Scores Layout (1BZ):**
    - Swapped Halftime Score and Final Score in the Game Setup modal (`⚙️`) so Halftime Score appears first on the left, followed by Final Score on the right.
 
+## 17. Workflow Enhancements, Decoupled Homography Caching & Media Review Player (2026-04-09, handoff 1CK, version 2.61.0)
+
+1. **Decoupled Homography Cache Key (`homography_sig` in `zoom_state.py`):**
+   - Camera motion homographies (`H.json`) depend strictly on the underlying video segment and reference frame (`src`, `ref`, `start`, `dur`), completely invariant to bounding box crop dimensions (`base_crop_norm`, `crop_w_norm`), pan keyframe trajectories, or pitch anchor mode.
+   - Introduced `homography_sig(r)` generating cache directory names prefixed with `_h_<hash>`.
+   - `get_zoom_homographies_data()` and `prepare_zoom_homographies()` resolve `_h_<hash>` first and fall back to legacy `<hash>` directories, eliminating redundant 20–60 second OpenCV ORB feature tracking recalculations when users adjust framing or glide pans.
+
+2. **Two-Pane Media Review Modal (`#mediaReviewModal` in `index.html` & `app.js`):**
+   - Built an integrated media player dialog featuring a categorized file list on the left pane (`#mediaFileList`) and an HTML5 video player on the right pane (`#mediaReviewVideo`).
+   - Powered by `GET /api/game/<game_id>/media`, dynamically categorizing outputs into 5 distinct buckets:
+     - `clips720`: Fast 720p review action clips.
+     - `clips4k`: Master 4K action clips.
+     - `reels720`: Fast 720p team preview highlight reel.
+     - `reels4k`: Master 4K team highlight reels.
+     - `player_reels`: Individual player spotlight reels.
+   - Integrated full keyboard shortcuts: <kbd>↑</kbd> / <kbd>P</kbd> for previous file, <kbd>↓</kbd> / <kbd>N</kbd> for next file, <kbd>Space</kbd> for play/pause, <kbd>←</kbd> / <kbd>→</kbd> for seeking.
+
+3. **Re-cut & Review Dropdown Menu (`#recutDropdownWrapper`):**
+   - Transformed the standalone Re-cut button into a unified split dropdown:
+     - Direct button click: executes fast 720p clip and preview reel cut (`POST /api/recut/<id>`).
+     - Dropdown arrow: reveals 1-click options to re-cut or open the Media Review modal filtered directly to 720p clips, 4K clips, 720p reels, 4K reels, or player reels.
+
+4. **Auto-Play on Select Toggle (`#chkAutoPlayOnSelect`):**
+   - Added an "Auto-play" checkbox next to the Loop Action button, persisting preference in `localStorage['matchreel_auto_play_on_select']`.
+   - When enabled (default), row selection or ArrowUp/ArrowDown immediately initiates action looping. When disabled, rows can be selected, browsed, and inspected without triggering sudden video playback loops.
+
+5. **Quick Player Tagging Chips (`#quickPlayerChips`):**
+   - Displays 1-click roster chips beneath the Player input in the Inspector pane.
+   - Clicking a player chip toggles that jersey number in the active row's Player field, updating the table and dirty state immediately without opening a modal.
+
+6. **In-App Google Sheet Pull (`POST /api/sheet/pull/<game_id>`):**
+   - Enables bidirectional Google Sheet synchronization directly from the web UI via the menu item `📥 Pull from Google Sheet...`.
+   - Pulls rows, creates a timestamped `.bak` backup, reconciles via `sync_game_state()`, updates table rows, and bumps the review revision.
+
+7. **Production Modal Quick Unlock (`#btnQuickUnlockProduction`):**
+   - Added a `⚡ Quick Unlock` shortcut in the Final 4K Production modal confirmation card.
+   - Automatically populates "START" into the confirmation field and enables the run button, eliminating manual typing while maintaining safety barriers.
+
+
 
 
 

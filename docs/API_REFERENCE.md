@@ -370,6 +370,27 @@ Pushes whole reviewed table (A..P) to Google Sheet with raw numbers and auto-fit
   }
   ```
 
+### `POST /api/sheet/pull/<game_id>`
+Pulls the latest reviewed rows from the game's Google Sheet tab back into the local reviewed CSV with automatic timestamped `.bak` creation and reconciliation via `sync_game_state()`.
+- **Response `200 OK`:**
+  ```json
+  {
+    "success": true,
+    "status": "pulled",
+    "tab": "04/01/26 League A",
+    "pulled_rows": 24,
+    "revision": "e3b0c442...",
+    "headers": ["game", "half", "type", ...],
+    "rows": [...],
+    "clips": ["", "1", "2", ...],
+    "changes": ["row 3 timing updated", ...]
+  }
+  ```
+- **Error Responses:**
+  - `400 Bad Request`: If Google Sheet tab has no data rows.
+  - `404 Not Found`: If game directory or reviewed CSV does not exist.
+  - `500 Internal Server Error`: If Google Sheet API credentials fail or tab cannot be read.
+
 ### `POST /api/recut/<game_id>`
 *(Production locked)* Spawns `sync_game.py --local` to re-cut modified clips and update preview reel.
 - **Response `200 OK`:**
@@ -423,6 +444,43 @@ Pushes whole reviewed table (A..P) to Google Sheet with raw numbers and auto-fit
     "day": "2026-04-01"
   }
   ```
+
+### `GET /api/game/<game_id>/media`
+Returns categorized lists of rendered match media (`clips720`, `clips4k`, `reels720`, `reels4k`, `player_reels`) with file sizes, modified timestamps, human-readable labels, and streaming URLs.
+- **Query Parameters:**
+  - `category` (optional, string): Filter results to a single category (`clips720`, `clips4k`, `reels720`, `reels4k`, `player_reels`).
+- **Response `200 OK`:**
+  ```json
+  {
+    "game_id": "2026-04-01",
+    "categories": {
+      "clips720": [
+        {
+          "filename": "clip_01_05-24_goal.mp4",
+          "label": "Clip 01 - 05-24 goal",
+          "rel_path": "out/2026-04-01/clips/clip_01_05-24_goal.mp4",
+          "url": "/stream/out/2026-04-01/clips/clip_01_05-24_goal.mp4",
+          "size_mb": 14.2,
+          "mtime": 1730764800
+        }
+      ],
+      "clips4k": [...],
+      "reels720": [...],
+      "reels4k": [...],
+      "player_reels": [...]
+    },
+    "counts": {
+      "clips720": 16,
+      "clips4k": 16,
+      "reels720": 1,
+      "reels4k": 1,
+      "player_reels": 3,
+      "total": 37
+    }
+  }
+  ```
+- **Error Responses:**
+  - `404 Not Found`: If match directory is not found.
 
 ---
 

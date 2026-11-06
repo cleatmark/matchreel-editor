@@ -38,11 +38,11 @@ Follow this 10-step sequence to process any brand-new match from raw dump to fin
 - **Step 3: Generate Title Cards (🎦 Generate Cards in Wizard)** - Renders Intro, Half-time, and Outro title cards (`000_intro_fullgame.mp4`, etc.) using chosen crests and team names.
 - **Step 4: Refine Clip Timings in Times Table** - Navigate clips. Drag Start/Event/End handles on the timeline. Ensure Start ≤ Event ≤ End (the editor warns and blocks saving if invalid).
 - **Step 5: Atomic Save & Push to Google Sheet** - Press <kbd>Ctrl + S</kbd> or click 💾 Save. Writes reviewed CSV with timestamped `.bak` sibling and synchronizes with your Google Sheet tab.
-- **Step 6: Fast Re-cut Changed Clips (🔄 Re-cut)** - Cuts edited clips locally and re-assembles the local preview reel. Logs persist server-side in `tmp/task_logs/`. The log window closes by itself when the run succeeds (untick **auto-close** to keep it open, even mid-run); the **📋 Log** button reopens the last log. The same applies to Generate review. **Honest status:** if any clip fails to cut or the preview reel check fails, the log ends with `ERROR: Re-cut finished with errors` listing the clips, the dialog shows a failure instead of "Completed successfully", and nothing is reported as done.
-- **Step 7: Craft Zoom Replays (🔍 Edit zoom)** - Review framing for each zoom replay. Adjust crop box, drop pan keyframe (<kbd>K</kbd>) if play moves across frame, test preview (<kbd>R</kbd>), and press <kbd>Ctrl + S</kbd> to save plan. *Unreviewed silent center crops are strictly blocked from rendering!*
+- **Step 6: Fast Re-cut Changed Clips (🔄 Re-cut)** - Cuts edited clips locally, renders any reviewed zoom replays in 720p, and re-assembles the local preview reel with zoom replays included. Logs persist server-side in `tmp/task_logs/`. The log window closes by itself when the run succeeds (untick **auto-close** to keep it open, even mid-run); the **📋 Log** button reopens the last log. The same applies to Generate review. **Honest status:** if any clip fails to cut or the preview reel check fails, the log ends with `ERROR: Re-cut finished with errors` listing the clips, the dialog shows a failure instead of "Completed successfully", and nothing is reported as done.
+- **Step 7: Craft Zoom Replays (🔍 Edit zoom)** - Review framing for each zoom replay. Adjust crop box, toggle Pitch Anchor (<kbd>A</kbd>) to lock framing onto stationary goals/pitch counteracting camera pan, drop pan keyframe (<kbd>K</kbd>) if following a player across frame, test preview (<kbd>R</kbd>), and press <kbd>Ctrl + S</kbd> to save plan. *Unreviewed silent center crops are strictly blocked from rendering!*
 - **Step 8: Render & Verify Zoom Replays (▶ Render exact / All)** - Renders 720p previews with `verify_zoom.py` edge/length verification. If any clip is missing or flagged, the drawer ends RED with a clear failure alert.
-- **Step 9: Featured Player Spotlight Reels (☰ Menu ▾ → Featured Player)** - Select featured roster player(s) (e.g. #7 Chloe Bennett or #10 Ava Patterson). Generates team highlight reel plus individual player spotlight reel(s). The reel pipeline shows a progress line per stage in the log window ([clips], [replays], [reels], team highlights done); it can take 30-50 minutes for a full game, and you can close the window and reopen it from the menu.
-- **Step 10: Final 4K Production (☰ Menu ▾ → Final 4K Production)** - Runs 6 pre-flight checks, generates serial batch script (`run_everything_<date>.bat`), shows the exact command, and launches after explicit confirmation. Safe to pause and resume!
+- **Step 9: Featured Player Spotlight Reels (✂️ Re-cut & Review ▾ → 🌟 Featured Player)** - Select featured roster player(s) (e.g. #7 Chloe Bennett or #10 Ava Patterson). Generates team highlight reel plus individual player spotlight reel(s). The reel pipeline shows a progress line per stage in the log window ([clips], [replays], [reels], team highlights done); it can take 30-50 minutes for a full game, and you can close the window and reopen it from the menu.
+- **Step 10: Final 4K Production (✂️ Re-cut & Review ▾ → 🚀 Final 4K Production)** - Runs 6 pre-flight checks, generates serial batch script (`run_everything_<date>.bat`), shows the exact command, and launches after explicit confirmation. Safe to pause and resume!
 
 ## ⚡ How to Launch the App
 
@@ -100,10 +100,11 @@ To provide clean, immediate desktop ergonomics, the **☰ Menu ▾** button sits
 
 - **⚙️ Game Setup...**: Configure match name, home & opponent teams, crests, league logos, scores, browse recording dumps from calendar, and generate title cards.
 - **👥 Team Roster...**: Open the high-contrast spreadsheet modal to edit player jersey numbers, full names, short names, and parent contact emails with automatic bidirectional Google Sheet sync and local caching.
-- **🌟 Featured Player & Reels...**: Open the team roster, select featured player(s), and generate player highlight reels.
-- **🚀 Final 4K Production...**: Run automated pre-flight checks, generate the master batch script (`run_everything_<date>.bat`), and launch 4K encoding.
 - **🧹 Tidy Output Folder...**: Reorganize match outputs into canonical subfolders (`final/`, `work/`, `_to_delete/`) with preview dry-run.
-- **🔄 Re-cut Changed Clips**: Fast local cut of all edited clips and instant regeneration of the local preview reel.
+- **📥 Pull from Google Sheet...**: Pull the latest row adjustments and player notes from your Google Sheet tab back into the local reviewed CSV with automatic backup.
+- **✂️ Re-cut Changed Clips**: Fast local cut of all edited clips and instant regeneration of the local preview reel (under ✂️ Re-cut & Review ▾).
+- **🌟 Featured Player & Reels...**: Open the team roster, select featured player(s), and generate player highlight reels (under ✂️ Re-cut & Review ▾).
+- **🚀 Final 4K Production...**: Run automated pre-flight checks, generate the master batch script (`run_everything_<date>.bat`), and launch 4K encoding (under ✂️ Re-cut & Review ▾).
 - **📖 User Guide**: Open this interactive user guide.
 
 ## 👥 Team Roster Management (☰ Menu ▾ → Roster...)
@@ -184,7 +185,7 @@ Precision editing requires both micro-second dragging and full-match awareness. 
 
 | Mode | Window Span | Ruler Intervals | Primary Use Case |
 |---|---|---|---|
-| **🔍 30s Zoom (Default)** | Centers a 30s window around mark (`[mark - 15s, mark + 15s]`) | Major ticks every **5s**, minor ticks every 1s | Dragging handles with 0.1s precision so shots aren't cut off |
+| **🔍 30s Zoom (Default)** | Centers a 30s window around mark (`[mark - 15s, mark + 15s]`) | Major ticks every **5s**, minor ticks every 1s, and sub-scale marks every **0.5s** | Dragging Start/Event/End handles with 0.5s increments matching the half-second marks on the scale |
 | **🌐 Full Match (5m)** | Entire video duration (`[00:00, Match End]`) | Major ticks every **5 minutes** (`05:00`, `10:00`...) | Macro match scrubbing and jumping across halves |
 
 > **Tip.** **Draggable Handles:** Grab any colored handle directly with your mouse. As you drag, the video updates in real time so you can match the cut to the exact kick of the ball.
@@ -194,6 +195,31 @@ Precision editing requires both micro-second dragging and full-match awareness. 
 Want to inspect a tackle or goal repeatedly while tweaking the start and end points? Click **🔁 Loop Action** or press <kbd>Ctrl + Enter</kbd>.
 
 The player continuously loops playback between `action_start` and `action_end`. While looping, you can drag the handles or press hotkeys <kbd>Alt + 1</kbd> and <kbd>Alt + 3</kbd> to adjust the boundaries on the fly!
+
+## 🎬 Re-cut & Media Review Modal
+
+The top-bar **✂️ Re-cut & Review ▾** dropdown combines fast action cutting with an integrated two-pane media player for instantaneous review of generated match footage:
+
+- **✂️ Re-cut Changed Clips:** Trims modified clips locally, renders reviewed zoom replays in 720p, and updates the local preview reel.
+- **🎬 Review 720p Action Clips:** Opens the Media Review modal filtered to fast 720p individual action clips.
+- **💎 Review 4K Action Clips:** Inspects master 4K high-resolution action clips.
+- **🎞️ Review 720p Preview Reels:** Reviews assembled 720p match preview reels.
+- **👑 Review 4K Master Reels:** Plays final 4K broadcast highlight reels.
+- **🌟 Review Player Reels:** Reviews individual player spotlight reels.
+
+### Two-Pane Media Review Modal Navigation:
+
+The Media Review modal features category tabs with file counts, a scrollable file list on the left pane, and an HTML5 video player on the right pane:
+
+- **Keyboard Navigation:** Press <kbd>↑</kbd> (or <kbd>P</kbd>) for Previous File, <kbd>↓</kbd> (or <kbd>N</kbd>) for Next File.
+- **Playback Controls:** Press <kbd>Space</kbd> to toggle Play/Pause, <kbd>←</kbd> to jump back 2s, and <kbd>→</kbd> to jump forward 2s.
+- **Category Switching:** Click category tabs at the top of the file list or switch via the Re-cut dropdown to filter files on demand.
+
+### Inspector & Playback Ergonomics:
+
+- **🔁 Auto-play on Select:** Toggle the *Auto-play* checkbox beside the Loop Action button. When enabled (default), clicking any row or pressing <kbd>↑</kbd>/<kbd>↓</kbd> in the table automatically begins looping the action window. When disabled, rows can be browsed and edited without triggering playback.
+- **🏷️ Quick Player Tagging Chips:** Beneath the Player input in the Inspector pane, 1-click roster chips let you quickly tag or remove jersey numbers in the active clip without opening a modal.
+- **⚡ 4K Production Quick Unlock:** In the Final 4K Production confirmation dialog, click **⚡ Quick Unlock** to instantly fill "START" into the confirmation field and unlock the Run button.
 
 ## 🎬 Visual Zoom Replay Editor (<kbd>/zoom/...</kbd>)
 
@@ -238,6 +264,8 @@ Brand-new zoom replays start in an **Unplaced** state to prevent silent off-targ
 
 > **Info.** **Drag Intent Protection:** If you accidentally drag the box at a later moment without pressing <kbd>K</kbd> first, a friendly toast appears: *"Moved the START box. Press K first to add a pan at this time"* with a button: **[Make this a pan keyframe instead]**. Clicking it restores your START box and creates the pan keyframe instantly!
 
+> **Info.** **Pitch Anchor Mode (A):** For stationary pitch landmarks (such as the goal mouth or penalty box), click **⚓ Anchor (A)** or press <kbd>A</kbd>. The crop box dynamically slides across the raw video using camera stabilization matrices, locking onto the physical pitch landmark throughout the play even as the gimbal camera turns. When rendered, camera pan is automatically neutralized.
+
 ## 🎛️ Zoom Inspector & Action Bar
 
 ![Zoom Inspector Detail](guide/images/zoom_inspector_detail.png)
@@ -246,11 +274,12 @@ Brand-new zoom replays start in an **Unplaced** state to prevent silent off-targ
 
 ### 🔢 Precision Typed Inputs: Replay Window, Trims & Freeze Hold
 
-The Replay Window offsets (**Window Start**, **Window End**), **Cut Trims**, and **Freeze Hold** are precision typed numeric fields. Dragging handles on the scrubber controls video scrubbing and keyframe placement; adjusting replay window boundaries is done by typing exact float values into these inputs (e.g. type `-5.5` or `+2.5`, then press <kbd>Tab</kbd> or <kbd>Enter</kbd>).
+The Replay Window offsets (**Window Start**, **Window End**), **Cut Trims**, and **Freeze Hold** are precision typed numeric fields. Dragging handles on the scrubber controls video scrubbing and keyframe placement; adjusting replay window boundaries is done by typing exact float values into these inputs (e.g. type `2.5` or `4.0`, or use the up/down stepper arrows, or click **[ Start (S)** / **End (E) ]** from the playhead). You can also click **↺ Reset Clip** at any time to instantly restore default window boundaries, clear trims, and reset framing.
 
-- **Window Start Offset:** Sets how many seconds before the event the slow-motion replay begins (default: `-2.5s`). When you adjust the Start Offset, the START anchor moment shifts in source time. The editor immediately warns you with a toast notification to verify framing and automatically seeks the video playhead to the new start moment so you can confirm or reposition the amber crop box.
-- **Window End Offset:** Sets how many seconds after the event the replay ends (default: `+2.0s`). Increase this (e.g. to `+3.0s`) to capture lingering post-goal celebrations.
-- **Live Duration Readout:** The sidebar displays a live duration readout (e.g. `8.0s source = 16.0s replay`) so you immediately see the impact at 0.5x slow-motion.
+- **Window Start:** Sets how many seconds before the event the slow-motion replay begins (`event − [2.5]s`). Increase this (e.g. to `4.0s`) to capture build-up play before the event. The editor debounces notices to avoid clutter, updates in-page guidance, and automatically seeks the playhead to the new start moment so you can confirm or adjust the crop box.
+- **Window End:** Sets how many seconds after the event the replay ends (`event + [2.5]s`). Increase this (e.g. to `3.5s`) to capture lingering post-goal celebrations.
+- **↺ Reset Clip:** Located in both the Replay Window header and the bottom action bar, this instantly resets the entire clip back to initial defaults: default start and duration window, zero trims, clear all pan keyframes, and default 2.5x center framing.
+- **Live Duration Readout:** The sidebar displays a live duration readout (e.g. `6.0s source = 12.0s replay`) so you immediately see the impact at 0.5x slow-motion.
 - **Status Badge Tracking & Stale Detection:** If a replay was previously rendered and you subsequently modify its window offsets, trims, or crop box, the editor immediately marks its status badge as RENDERED (stale) in amber with an informative hover tooltip detailing the exact changes (e.g. *"Framing modified: crop geometry differs from render"*). The **Save Plan** button also changes to amber when unsaved modifications exist, switching to green once saved.
 
 ### ▶️ Instant Replay Preview (<kbd>R</kbd>)
@@ -294,7 +323,7 @@ Accidental navigation or closure never loses your zoom work. If any edits were m
 
 ## 🚀 Final 4K Production
 
-When all clip timings and zoom replays are verified, click **☰ Menu ▾ → Final 4K Production...**:
+When all clip timings and zoom replays are verified, click **✂️ Re-cut & Review ▾ → 🚀 Final 4K Production...**:
 
 - **1. Automated Pre-Flight & Duration Estimate** - Validates game setup, roster presence, title cards, 0 unreviewed zoom clips, valid timing order, and 20+ GB disk space. Displays estimated total render time (e.g. `~1.8 hours (107 min)`).
 - **2. 🔍 Dry Run Verification** - **What the run file is:** `run_everything_<date>.bat` is only a one-line launcher for `tools\pipeline\run_everything.py` (title cards → full game → 4K clips/replays/reels → output check). The Python runner does the work, skips finished pieces, and writes `run_everything_<date>.log`, which ends with `ALL OK` when every check passes. Press **Start** again after a Cancel or restart and it resumes where it stopped.
@@ -330,8 +359,11 @@ Master these shortcuts to review games twice as fast:
 | <kbd>X</kbd> | Toggle `skip` tag on selected row | — |
 | <kbd>K</kbd> | — | **Add Pan Keyframe** at playhead |
 | <kbd>R</kbd> | — | **Play Replay Preview** (animated box) |
-| <kbd>A</kbd> / <kbd>D</kbd> or <kbd>,</kbd> / <kbd>.</kbd> | Step backward / forward 1 frame | Step backward / forward 1 frame |
-| <kbd>S</kbd> / <kbd>W</kbd> | — | Step backward / forward 0.5 seconds |
+| <kbd>S</kbd> or <kbd>[</kbd> | — | **Set Window Start** at playhead (anchors start framing) |
+| <kbd>E</kbd> or <kbd>]</kbd> | — | **Set Window End** at playhead |
+| <kbd>A</kbd> | Step backward 1 frame (or <kbd>,</kbd>) | **Toggle Pitch Anchor** (locks zoom to stationary goals/field) |
+| <kbd>D</kbd> or <kbd>.</kbd> | Step forward 1 frame | Step forward 1 frame |
+| <kbd>Q</kbd> / <kbd>W</kbd> | — | Step backward / forward 0.5 seconds |
 | <kbd>Left</kbd> / <kbd>Right</kbd> | Step -1s / +1s (Shift: -5s / +5s) | Step -1s / +1s |
 | <kbd>Up</kbd> / <kbd>Down</kbd> | Select previous / next row in table | — |
 | <kbd>Insert</kbd> | **Add new row** at video playhead | — |
@@ -369,7 +401,7 @@ Master these shortcuts to review games twice as fast:
 2. In the right Inspector panel under **Replay Window**, type new values into **Start Offset** (e.g. type `-5.5` to start 5.5s before the shot) or **End Offset** (e.g. type `+2.5` to capture celebrations).
 3. Notice that changing Start Offset automatically moves the playhead to the new start moment with an on-screen prompt: verify that the amber crop box accurately frames the action at this earlier start moment.
 4. Press <kbd>Ctrl + S</kbd> to save the plan. Notice the status badge reflects RENDERED (stale). Click **⚡ Render exact** to re-render the 720p review preview.
-5. To update your full-quality 4K deliverables, return to the Review Editor and open **☰ Menu ▾ → 🚀 Final 4K Production...**. The dialog will display a prominent **⚠️ 4K Outputs Out of Date** indicator listing your modified clips.
+5. To update your full-quality 4K deliverables, return to the Review Editor and open **✂️ Re-cut & Review ▾ → 🚀 Final 4K Production...**. The dialog will display a prominent **⚠️ 4K Outputs Out of Date** indicator listing your modified clips.
 6. Click **⚡ Rebuild Changed 4K Replays & Reels**. In just ~5 to 8 minutes (~1m per modified 4K replay + ~3.5m highlight reels), the pipeline re-renders only the modified 4K replays and re-assembles the highlight reels (skipping all untouched clips!).
 
 ## ❓ Troubleshooting & FAQ
